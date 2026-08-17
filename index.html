@@ -3,108 +3,173 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b0d12" />
-  <meta name="description" content="Ahmed Enes Film Sahnesi - tarayıcıda stop-motion film stüdyosu" />
+  <meta name="theme-color" content="#080a0f" />
+  <meta name="description" content="Ahmed Enes Film Sahnesi — profesyonel, tarayıcı tabanlı stop-motion film stüdyosu." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Ahmed Enes Film Sahnesi</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
       <div class="brand" aria-label="Ahmed Enes Film Sahnesi">
-        <div class="brand-mark">AE</div>
-        <div>
+        <div class="brand-mark" aria-hidden="true">AE</div>
+        <div class="brand-copy">
           <strong>Ahmed Enes</strong>
           <span>Film Sahnesi</span>
         </div>
       </div>
 
       <label class="project-name-wrap">
-        <span>Proje</span>
-        <input id="projectName" class="project-name" value="Yeni Film" maxlength="60" />
+        <span>PROJE</span>
+        <input id="projectName" class="project-name" value="Yeni Film" maxlength="60" aria-label="Proje adı" />
+        <span class="save-chip" id="saveChip"><i></i><b>Hazır</b></span>
       </label>
 
       <div class="top-actions">
         <button class="icon-btn settings-btn" id="settingsBtn" title="Ayarlar" aria-label="Ayarlar">⚙</button>
-        <button class="icon-btn" id="newProjectBtn" title="Yeni proje" aria-label="Yeni proje">＋</button>
+        <button class="icon-btn" id="undoBtn" title="Geri al (Ctrl/⌘ Z)" aria-label="Geri al">↶</button>
+        <button class="icon-btn" id="redoBtn" title="İleri al (Ctrl/⌘ Shift Z)" aria-label="İleri al">↷</button>
+        <button class="btn" id="newProjectBtn">Yeni</button>
         <button class="btn" id="openProjectBtn">Aç</button>
         <button class="btn primary" id="saveProjectBtn">Kaydet</button>
-        <button class="btn accent" id="exportBtn">Video</button>
+        <button class="btn accent" id="exportBtn">Dışa aktar</button>
+        <button class="icon-btn" id="shortcutsBtn" title="Klavye kısayolları" aria-label="Klavye kısayolları">?</button>
       </div>
     </header>
 
     <main class="workspace">
       <aside class="side-panel" id="sidePanel">
+        <div class="panel-mobile-head">
+          <strong>Stüdyo Ayarları</strong>
+          <button class="icon-btn" id="closeSettingsBtn" aria-label="Ayarları kapat">×</button>
+        </div>
+
         <section class="panel-section">
-          <h2>Sahne</h2>
+          <div class="section-heading"><h2>Çekim</h2><span class="section-pill">PRO</span></div>
+
+          <label class="field-row">
+            <span>Çözünürlük</span>
+            <select id="resolutionSelect">
+              <option value="720">HD 720p</option>
+              <option value="1080" selected>Full HD 1080p</option>
+              <option value="2160">4K (desteklenirse)</option>
+            </select>
+          </label>
+
+          <label class="field-row">
+            <span>Kadraj</span>
+            <select id="aspectSelect">
+              <option value="16:9" selected>16:9 Sinema</option>
+              <option value="4:3">4:3 Klasik</option>
+              <option value="1:1">1:1 Kare</option>
+              <option value="source">Kamera oranı</option>
+            </select>
+          </label>
+
           <div class="setting-row">
-            <span>FPS</span>
-            <div class="range-with-value">
-              <input id="fpsInput" type="range" min="1" max="30" value="12" />
-              <strong id="fpsValue">12</strong>
-            </div>
+            <div class="setting-label"><span>FPS</span><strong id="fpsValue">12</strong></div>
+            <input id="fpsInput" type="range" min="1" max="30" value="12" />
+            <div class="range-marks"><span>1</span><span>12</span><span>24</span><span>30</span></div>
           </div>
+
           <div class="setting-row">
-            <span>Onion Skin</span>
-            <div class="range-with-value">
-              <input id="onionInput" type="range" min="0" max="90" value="35" />
-              <strong id="onionValue">35%</strong>
-            </div>
+            <div class="setting-label"><span>Onion Skin</span><strong id="onionValue">35%</strong></div>
+            <input id="onionInput" type="range" min="0" max="90" value="35" />
           </div>
+
+          <label class="field-row">
+            <span>Sayaç</span>
+            <select id="timerSelect">
+              <option value="0">Kapalı</option>
+              <option value="2">2 saniye</option>
+              <option value="3" selected>3 saniye</option>
+              <option value="5">5 saniye</option>
+              <option value="10">10 saniye</option>
+            </select>
+          </label>
+
           <label class="toggle-row">
-            <span>Izgara</span>
+            <span><b>Izgara</b><small>Üçler kuralı</small></span>
             <input id="gridToggle" type="checkbox" />
           </label>
           <label class="toggle-row">
-            <span>Ayna</span>
+            <span><b>Ayna</b><small>Ön kamera için</small></span>
             <input id="mirrorToggle" type="checkbox" checked />
           </label>
         </section>
 
         <section class="panel-section">
-          <h2>Kare</h2>
-          <button class="panel-btn" id="duplicateBtn">Kareyi çoğalt</button>
-          <button class="panel-btn" id="moveLeftBtn">Sola taşı</button>
-          <button class="panel-btn" id="moveRightBtn">Sağa taşı</button>
-          <button class="panel-btn danger" id="deleteFrameBtn">Kareyi sil</button>
+          <h2>Kare İşlemleri</h2>
+          <div class="panel-grid">
+            <button class="panel-btn" id="duplicateBtn"><span>⧉</span>Çoğalt</button>
+            <button class="panel-btn" id="deleteFrameBtn"><span>⌫</span>Sil</button>
+            <button class="panel-btn" id="moveLeftBtn"><span>←</span>Sola</button>
+            <button class="panel-btn" id="moveRightBtn"><span>→</span>Sağa</button>
+          </div>
         </section>
 
         <section class="panel-section compact-stats">
           <h2>Proje</h2>
           <div><span>Kare</span><strong id="frameCount">0</strong></div>
           <div><span>Süre</span><strong id="durationValue">0.0 sn</strong></div>
+          <div><span>Boyut</span><strong id="projectSize">0 MB</strong></div>
           <div><span>Durum</span><strong id="saveStatus">Hazır</strong></div>
         </section>
+
+        <section class="panel-section mobile-project-actions">
+          <h2>Proje İşlemleri</h2>
+          <div class="panel-grid">
+            <button class="panel-btn" id="mobileNewProjectBtn"><span>＋</span>Yeni</button>
+            <button class="panel-btn" id="mobileOpenProjectBtn"><span>↗</span>Aç</button>
+            <button class="panel-btn" id="mobileSaveProjectBtn"><span>✓</span>Kaydet</button>
+            <button class="panel-btn" id="mobileUndoBtn"><span>↶</span>Geri al</button>
+          </div>
+        </section>
+
+        <div class="privacy-note"><span>●</span> Görüntüler cihazında işlenir; sunucuya yüklenmez.</div>
       </aside>
 
       <section class="stage-column">
         <div class="stage-toolbar">
-          <div class="camera-state"><span class="status-dot" id="statusDot"></span><span id="cameraStatus">Kamera kapalı</span></div>
+          <div class="camera-state">
+            <span class="status-dot" id="statusDot"></span>
+            <div><strong id="cameraStatus">Kamera kapalı</strong><span id="cameraMeta">Hazır olduğunda kamerayı aç</span></div>
+          </div>
           <div class="stage-toolbar-actions">
+            <select class="device-select" id="cameraDeviceSelect" aria-label="Kamera seçimi"><option value="">Otomatik kamera</option></select>
             <button class="ghost-btn" id="switchCameraBtn">Kamera değiştir</button>
             <button class="ghost-btn" id="fullscreenBtn">Tam ekran</button>
           </div>
         </div>
 
-        <div class="stage" id="stage">
-          <video id="cameraVideo" autoplay muted playsinline></video>
-          <img id="framePreview" alt="Seçili kare" />
-          <img id="onionLayer" alt="Önceki kare katmanı" />
-          <div class="grid-overlay" id="gridOverlay" aria-hidden="true"></div>
-          <div class="stage-empty" id="stageEmpty">
-            <div class="camera-glyph">◉</div>
-            <strong>Film sahnen hazır</strong>
-            <span>Kamerayı aç ve ilk kareyi çek.</span>
+        <div class="stage-wrap">
+          <div class="stage" id="stage" data-aspect="16:9">
+            <video id="cameraVideo" autoplay muted playsinline></video>
+            <img id="framePreview" alt="Seçili kare" />
+            <img id="onionLayer" alt="Onion skin katmanı" />
+            <div class="grid-overlay" id="gridOverlay" aria-hidden="true"></div>
+            <div class="stage-empty" id="stageEmpty">
+              <div class="empty-icon">●</div>
+              <strong>Film sahnen hazır</strong>
+              <span>Kamerayı aç ve ilk kareyi yakala.</span>
+              <button class="empty-action" id="emptyCameraBtn">Kamerayı aç</button>
+            </div>
+            <div class="countdown" id="countdown"></div>
+            <div class="record-flash" id="recordFlash"></div>
+            <div class="frame-badge" id="frameBadge">Kare 0</div>
+            <div class="live-badge" id="liveBadge"><span></span> CANLI</div>
           </div>
-          <div class="countdown" id="countdown"></div>
-          <div class="frame-badge" id="frameBadge">Kare 0</div>
         </div>
 
         <div class="capture-bar">
           <button class="round secondary" id="previousBtn" aria-label="Önceki kare">‹</button>
-          <button class="camera-toggle" id="cameraToggleBtn">Kamerayı Aç</button>
-          <button class="capture" id="captureBtn" aria-label="Kare çek"><span></span></button>
-          <button class="camera-toggle subtle" id="timerBtn" aria-pressed="false">3 sn</button>
+          <button class="camera-toggle" id="cameraToggleBtn"><span class="camera-dot"></span>Kamerayı Aç</button>
+          <button class="capture" id="captureBtn" aria-label="Kare çek" title="Kare çek (Boşluk)"><span></span></button>
+          <button class="camera-toggle timer-display" id="timerBtn" aria-label="Sayaç"><span>⏱</span><b id="timerButtonText">3 sn</b></button>
           <button class="round secondary" id="nextBtn" aria-label="Sonraki kare">›</button>
         </div>
       </section>
@@ -113,12 +178,18 @@
     <section class="timeline-dock" id="timelineDock">
       <div class="timeline-header">
         <div class="playback-controls">
-          <button class="play-btn" id="playBtn">▶</button>
-          <button class="small-btn" id="goStartBtn">|‹</button>
+          <button class="play-btn" id="playBtn" aria-label="Oynat">▶</button>
+          <button class="small-btn" id="goStartBtn" title="Başa git">|‹</button>
           <span id="playbackPosition">00:00.0</span>
         </div>
-        <div class="timeline-title">Timeline <span id="timelineHint">Kareleri sürükleyerek sırala</span></div>
-        <button class="collapse-btn" id="collapseTimelineBtn" aria-expanded="true">⌄</button>
+        <div class="timeline-title">
+          <strong>Timeline</strong>
+          <span id="timelineHint">Kareleri sürükleyerek sırala</span>
+        </div>
+        <div class="timeline-tools">
+          <label title="Timeline yakınlaştırma"><span>−</span><input id="timelineZoom" type="range" min="0" max="100" value="45" /><span>＋</span></label>
+          <button class="collapse-btn" id="collapseTimelineBtn" aria-expanded="true">⌄</button>
+        </div>
       </div>
       <div class="timeline-body" id="timelineBody">
         <div class="timeline-track" id="timelineTrack"></div>
@@ -126,10 +197,32 @@
     </section>
   </div>
 
+  <dialog class="studio-dialog" id="exportDialog">
+    <div class="dialog-head"><div><span class="eyebrow">DIŞA AKTAR</span><h3>Filmini paylaş</h3></div><button class="icon-btn" data-close-dialog="exportDialog">×</button></div>
+    <div class="export-grid">
+      <button class="export-card" id="exportVideoBtn"><span class="export-icon">▶</span><div><strong>Video</strong><small>WebM · mevcut FPS</small></div></button>
+      <button class="export-card" id="exportProjectBtn"><span class="export-icon">◇</span><div><strong>Proje dosyası</strong><small>.aefs.json · tekrar düzenlenebilir</small></div></button>
+      <button class="export-card" id="exportFrameBtn"><span class="export-icon">▣</span><div><strong>Seçili kare</strong><small>JPEG · tam çözünürlük</small></div></button>
+    </div>
+    <p class="dialog-note">Video dışa aktarma desteği tarayıcıya göre değişebilir. Proje dosyası tüm kareleri içerir.</p>
+  </dialog>
+
+  <dialog class="studio-dialog shortcuts-dialog" id="shortcutsDialog">
+    <div class="dialog-head"><div><span class="eyebrow">HIZLI ÇALIŞ</span><h3>Klavye kısayolları</h3></div><button class="icon-btn" data-close-dialog="shortcutsDialog">×</button></div>
+    <div class="shortcut-list">
+      <div><span>Kare çek</span><kbd>Space</kbd></div>
+      <div><span>Oynat / durdur</span><kbd>P</kbd></div>
+      <div><span>Önceki / sonraki kare</span><span><kbd>←</kbd> <kbd>→</kbd></span></div>
+      <div><span>Seçili kareyi sil</span><kbd>Delete</kbd></div>
+      <div><span>Kaydet</span><kbd>Ctrl/⌘ S</kbd></div>
+      <div><span>Geri al</span><kbd>Ctrl/⌘ Z</kbd></div>
+      <div><span>İleri al</span><kbd>Ctrl/⌘ ⇧ Z</kbd></div>
+    </div>
+  </dialog>
+
   <input id="projectFileInput" type="file" accept="application/json,.json" hidden />
   <canvas id="captureCanvas" hidden></canvas>
   <canvas id="exportCanvas" hidden></canvas>
-
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script type="module" src="./js/app.js"></script>

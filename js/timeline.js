@@ -5,6 +5,8 @@ export class Timeline {
     this.frames = [];
     this.selectedIndex = -1;
     this.dragIndex = null;
+    this.zoom = 45;
+    this.setZoom(this.zoom);
   }
 
   setFrames(frames, selectedIndex) {
@@ -13,12 +15,24 @@ export class Timeline {
     this.render();
   }
 
+  select(index) {
+    this.selectedIndex = index;
+    this.track.querySelectorAll('.frame-card').forEach((card, i) => card.classList.toggle('selected', i === index));
+    this.track.querySelector('.frame-card.selected')?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+  }
+
+  setZoom(value) {
+    this.zoom = Number(value);
+    const width = Math.round(78 + (this.zoom / 100) * 86);
+    this.track.style.setProperty('--frame-width', `${width}px`);
+  }
+
   render() {
     this.track.innerHTML = '';
     if (!this.frames.length) {
       const empty = document.createElement('div');
       empty.className = 'timeline-empty';
-      empty.textContent = 'Henüz kare yok — kamerayı açıp ilk kareyi çek.';
+      empty.innerHTML = '<strong>Timeline boş</strong><span>Kamerayı açıp ilk kareyi çek.</span>';
       this.track.append(empty);
       return;
     }
@@ -37,16 +51,24 @@ export class Timeline {
 
       const badge = document.createElement('span');
       badge.className = 'frame-index';
-      badge.textContent = String(index + 1);
+      badge.textContent = String(index + 1).padStart(3, '0');
 
       button.append(img, badge);
       button.addEventListener('click', () => this.handlers.onSelect?.(index));
-      button.addEventListener('dragstart', () => {
+      button.addEventListener('dblclick', () => this.handlers.onDuplicate?.(index));
+      button.addEventListener('dragstart', event => {
         this.dragIndex = index;
         button.classList.add('dragging');
+        event.dataTransfer.effectAllowed = 'move';
       });
-      button.addEventListener('dragend', () => button.classList.remove('dragging'));
-      button.addEventListener('dragover', event => event.preventDefault());
+      button.addEventListener('dragend', () => {
+        button.classList.remove('dragging');
+        this.dragIndex = null;
+      });
+      button.addEventListener('dragover', event => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+      });
       button.addEventListener('drop', event => {
         event.preventDefault();
         if (this.dragIndex === null || this.dragIndex === index) return;
@@ -56,8 +78,6 @@ export class Timeline {
       this.track.append(button);
     });
 
-    requestAnimationFrame(() => {
-      this.track.querySelector('.frame-card.selected')?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
-    });
+    requestAnimationFrame(() => this.track.querySelector('.frame-card.selected')?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' }));
   }
 }

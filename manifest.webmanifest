@@ -1,0 +1,14 @@
+{
+  "name": "Ahmed Enes Film Sahnesi",
+  "short_name": "Film Sahnesi",
+  "description": "Profesyonel tarayıcı tabanlı stop-motion film stüdyosu",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#080a0f",
+  "theme_color": "#080a0f",
+  "orientation": "any",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
