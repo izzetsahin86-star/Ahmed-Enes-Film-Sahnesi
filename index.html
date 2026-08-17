@@ -12,6 +12,7 @@
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./studio-shell.css" />
+  <link rel="stylesheet" href="./life-lapse.css" />
 </head>
 <body>
   <div class="app-shell studio-shell">
@@ -48,9 +49,10 @@
             <video id="cameraVideo" autoplay muted playsinline></video>
             <img id="framePreview" alt="Seçili kare" />
             <img id="onionLayer" alt="Onion skin katmanı" />
+            <div id="colorTint" class="color-tint" aria-hidden="true"></div>
             <div class="grid-overlay" id="gridOverlay" aria-hidden="true"></div>
             <div class="stage-empty" id="stageEmpty">
-              <div class="empty-icon">●</div><strong>Film sahnen hazır</strong><span>Kamerayı aç ve ilk kareyi yakala.</span>
+              <div class="empty-icon">●</div><strong>Film sahnen hazır</strong><span>Kamerayı aç veya mevcut fotoğraflarını içe aktar.</span>
               <button class="empty-action" id="emptyCameraBtn">Kamerayı aç</button>
             </div>
             <div class="countdown" id="countdown"></div><div class="record-flash" id="recordFlash"></div>
@@ -77,32 +79,64 @@
         </nav>
         <button class="collapse-btn dock-collapse" id="collapseTimelineBtn" aria-expanded="true" title="Alt paneli küçült">⌄</button>
       </div>
+
       <div class="dock-body">
         <aside class="dock-pane active" id="sidePanel" data-dock-panel="shoot">
           <button class="visually-hidden" id="closeSettingsBtn" aria-label="Ayarları kapat">×</button>
-          <div class="control-strip">
+          <div class="control-strip enhanced-strip">
             <label class="dock-control"><span>Çözünürlük</span><select id="resolutionSelect"><option value="720">HD 720p</option><option value="1080" selected>Full HD 1080p</option><option value="2160">4K</option></select></label>
             <label class="dock-control"><span>Kadraj</span><select id="aspectSelect"><option value="16:9" selected>16:9 Sinema</option><option value="4:3">4:3 Klasik</option><option value="1:1">1:1 Kare</option><option value="source">Kamera oranı</option></select></label>
             <div class="dock-control range-control"><div class="dock-control-head"><span>FPS</span><strong id="fpsValue">12</strong></div><input id="fpsInput" type="range" min="1" max="30" value="12" /></div>
             <div class="dock-control range-control"><div class="dock-control-head"><span>Onion Skin</span><strong id="onionValue">35%</strong></div><input id="onionInput" type="range" min="0" max="90" value="35" /></div>
             <label class="dock-control"><span>Sayaç</span><select id="timerSelect"><option value="0">Kapalı</option><option value="2">2 saniye</option><option value="3" selected>3 saniye</option><option value="5">5 saniye</option><option value="10">10 saniye</option></select></label>
+
+            <div class="dock-control feature-control interval-control">
+              <div class="dock-control-head"><span>Interval Çekim</span><small id="intervalStatus">Kapalı</small></div>
+              <div class="inline-control"><select id="intervalSelect"><option value="0">Kapalı</option><option value="0.5">0.5 sn</option><option value="1">1 sn</option><option value="2">2 sn</option><option value="3">3 sn</option><option value="5">5 sn</option><option value="10">10 sn</option></select><button id="intervalStartBtn" class="mini-action" type="button" disabled>Interval Başlat</button></div>
+            </div>
+
+            <div class="dock-control range-control camera-feature-control">
+              <div class="dock-control-head"><span>Kamera Zoom</span><strong id="zoomValue">1.0×</strong></div>
+              <input id="zoomInput" type="range" min="1" max="1" step="0.1" value="1" disabled />
+              <small id="zoomSupport">Kamerayı açınca kontrol edilir</small>
+            </div>
+
+            <div class="lock-control-group">
+              <button id="exposureLockBtn" class="lock-action" type="button" disabled>Pozlama kilidi</button>
+              <button id="whiteBalanceLockBtn" class="lock-action" type="button" disabled>Beyaz ayarı kilidi</button>
+            </div>
+
             <label class="dock-toggle"><input id="gridToggle" type="checkbox" /><span><b>Izgara</b><small>Üçler kuralı</small></span></label>
             <label class="dock-toggle"><input id="mirrorToggle" type="checkbox" checked /><span><b>Ayna</b><small>Ön kamera</small></span></label>
           </div>
         </aside>
 
         <section class="dock-pane frames-pane" data-dock-panel="frames">
-          <div class="frames-layout">
-            <div class="frame-actions-rail">
+          <div class="frames-layout enhanced-frames-layout">
+            <div class="frame-actions-rail extended-actions-rail">
               <div class="playback-controls"><button class="play-btn" id="playBtn" aria-label="Oynat">▶</button><button class="small-btn" id="goStartBtn" title="Başa git">|‹</button><span id="playbackPosition">00:00.0</span></div>
               <div class="frame-action-buttons">
+                <button class="panel-btn" id="importPhotosBtn"><span>＋</span>Fotoğraf</button>
                 <button class="panel-btn" id="duplicateBtn"><span>⧉</span>Çoğalt</button><button class="panel-btn" id="deleteFrameBtn"><span>⌫</span>Sil</button>
                 <button class="panel-btn" id="moveLeftBtn"><span>←</span>Sola</button><button class="panel-btn" id="moveRightBtn"><span>→</span>Sağa</button>
               </div>
+              <div class="edit-selects">
+                <label><span>Freeze</span><select id="freezeSelect" disabled><option value="1">Normal</option><option value="2">×2</option><option value="3">×3</option><option value="4">×4</option><option value="6">×6</option><option value="12">×12</option><option value="24">×24</option></select></label>
+                <label><span>Oynatma</span><select id="playbackModeSelect"><option value="normal">Normal</option><option value="reverse">Reverse</option><option value="boomerang">Boomerang</option></select></label>
+              </div>
             </div>
+
             <div class="timeline-zone">
               <div class="timeline-mini-head"><span>Kare Zaman Çizelgesi</span><label><span>−</span><input id="timelineZoom" type="range" min="0" max="100" value="45" /><span>＋</span></label></div>
               <div class="timeline-body" id="timelineBody"><div class="timeline-track" id="timelineTrack"></div></div>
+            </div>
+
+            <div class="color-editor">
+              <div class="color-editor-head"><strong>Renk</strong><button id="resetColorBtn" type="button">Sıfırla</button></div>
+              <label><span>Parlaklık <b id="brightnessValue">0</b></span><input id="brightnessInput" type="range" min="-50" max="50" value="0" /></label>
+              <label><span>Kontrast <b id="contrastValue">0</b></span><input id="contrastInput" type="range" min="-50" max="50" value="0" /></label>
+              <label><span>Doygunluk <b id="saturationValue">0</b></span><input id="saturationInput" type="range" min="-100" max="100" value="0" /></label>
+              <label><span>Sıcaklık <b id="warmthValue">0</b></span><input id="warmthInput" type="range" min="-100" max="100" value="0" /></label>
             </div>
           </div>
         </section>
@@ -125,8 +159,8 @@
 
         <section class="dock-pane export-pane" data-dock-panel="export">
           <div class="export-dock-layout">
-            <button class="export-launch" id="exportBtn"><span>↗</span><div><b>Filmi Dışa Aktar</b><small>Video, proje dosyası veya seçili kare</small></div></button>
-            <button class="shortcut-launch" type="button" data-open-shortcuts><span>⌨</span><div><b>Kısayollar</b><small>Hızlı çekim ve düzenleme</small></div></button>
+            <button class="export-launch" id="exportBtn"><span>↗</span><div><b>Filmi Dışa Aktar</b><small>MP4, GIF, WebM, proje veya kare</small></div></button>
+            <button class="shortcut-launch" type="button" data-open-shortcuts><span>⌨</span><div><b>Kısayollar</b><small>Space çekim · I interval · P oynat</small></div></button>
             <div class="privacy-note"><span>●</span> Görüntüler cihazında işlenir; sunucuya yüklenmez.</div>
           </div>
         </section>
@@ -134,19 +168,27 @@
     </section>
   </div>
 
-  <dialog class="studio-dialog" id="exportDialog">
+  <dialog class="studio-dialog export-dialog-wide" id="exportDialog">
     <div class="dialog-head"><div><span class="eyebrow">DIŞA AKTAR</span><h3>Filmini paylaş</h3></div><button class="icon-btn" data-close-dialog="exportDialog">×</button></div>
-    <div class="export-grid">
-      <button class="export-card" id="exportVideoBtn"><span class="export-icon">▶</span><div><strong>Video</strong><small>WebM · mevcut FPS</small></div></button>
+    <div class="export-grid enhanced-export-grid">
+      <button class="export-card featured" id="exportMp4Btn"><span class="export-icon">▶</span><div><strong>MP4 Video</strong><small>Destekleyen tarayıcılarda H.264/MP4</small></div></button>
+      <button class="export-card featured" id="exportGifBtn"><span class="export-icon">GIF</span><div><strong>Animasyonlu GIF</strong><small>640 px · döngülü</small></div></button>
+      <button class="export-card" id="exportWebmBtn"><span class="export-icon">W</span><div><strong>WebM Video</strong><small>MP4 desteklenmezse güvenli alternatif</small></div></button>
       <button class="export-card" id="exportProjectBtn"><span class="export-icon">◇</span><div><strong>Proje dosyası</strong><small>.aefs.json · tekrar düzenlenebilir</small></div></button>
-      <button class="export-card" id="exportFrameBtn"><span class="export-icon">▣</span><div><strong>Seçili kare</strong><small>JPEG · tam çözünürlük</small></div></button>
-    </div><p class="dialog-note">Video dışa aktarma desteği tarayıcıya göre değişebilir. Proje dosyası tüm kareleri içerir.</p>
+      <button class="export-card" id="exportFrameBtn"><span class="export-icon">▣</span><div><strong>Seçili kare</strong><small>JPEG · renk ayarları uygulanmış</small></div></button>
+    </div>
+    <p class="dialog-note">MP4 desteği cihaz ve tarayıcıya bağlıdır. Uygulama önce tarayıcının desteklediği MIME türünü kontrol eder; destek yoksa GIF veya WebM kullanılabilir.</p>
   </dialog>
+
   <dialog class="studio-dialog shortcuts-dialog" id="shortcutsDialog">
     <div class="dialog-head"><div><span class="eyebrow">HIZLI ÇALIŞ</span><h3>Klavye kısayolları</h3></div><button class="icon-btn" data-close-dialog="shortcutsDialog">×</button></div>
-    <div class="shortcut-list"><div><span>Kare çek</span><kbd>Space</kbd></div><div><span>Oynat / durdur</span><kbd>P</kbd></div><div><span>Önceki / sonraki kare</span><span><kbd>←</kbd> <kbd>→</kbd></span></div><div><span>Seçili kareyi sil</span><kbd>Delete</kbd></div><div><span>Kaydet</span><kbd>Ctrl/⌘ S</kbd></div><div><span>Geri al</span><kbd>Ctrl/⌘ Z</kbd></div><div><span>İleri al</span><kbd>Ctrl/⌘ ⇧ Z</kbd></div></div>
+    <div class="shortcut-list"><div><span>Kare çek</span><kbd>Space</kbd></div><div><span>Interval başlat / durdur</span><kbd>I</kbd></div><div><span>Oynat / durdur</span><kbd>P</kbd></div><div><span>Önceki / sonraki kare</span><span><kbd>←</kbd> <kbd>→</kbd></span></div><div><span>Seçili kareyi sil</span><kbd>Delete</kbd></div><div><span>Kaydet</span><kbd>Ctrl/⌘ S</kbd></div><div><span>Geri al</span><kbd>Ctrl/⌘ Z</kbd></div><div><span>İleri al</span><kbd>Ctrl/⌘ ⇧ Z</kbd></div></div>
   </dialog>
-  <input id="projectFileInput" type="file" accept="application/json,.json" hidden /><canvas id="captureCanvas" hidden></canvas><canvas id="exportCanvas" hidden></canvas><div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <input id="projectFileInput" type="file" accept="application/json,.json" hidden />
+  <input id="photoImportInput" type="file" accept="image/*" multiple hidden />
+  <canvas id="captureCanvas" hidden></canvas><canvas id="exportCanvas" hidden></canvas><canvas id="workCanvas" hidden></canvas>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script type="module" src="./js/app.js"></script><script type="module" src="./js/ui-shell.js"></script>
 </body>
 </html>
