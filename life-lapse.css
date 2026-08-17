@@ -1,0 +1,36 @@
+/* Life Lapse-inspired production controls — Ahmed Enes Film Sahnesi */
+.color-tint { position:absolute; inset:0; z-index:3; pointer-events:none; mix-blend-mode:soft-light; opacity:0; }
+.enhanced-strip { gap:10px; }
+.feature-control { min-width:220px; }
+.interval-control { min-width:270px; }
+.inline-control { display:grid; grid-template-columns:92px 1fr; gap:8px; align-items:center; }
+.inline-control select { min-width:0; }
+.mini-action,.lock-action,.color-editor button { border:1px solid #30384a; background:#161b26; color:#dce3ef; border-radius:9px; min-height:34px; padding:7px 10px; font-size:11px; font-weight:800; cursor:pointer; }
+.mini-action:hover,.lock-action:hover,.color-editor button:hover { background:#20283a; border-color:#46516a; }
+.mini-action.active,.lock-action.active { background:#17371f; border-color:#2d7b42; color:#a7f3ba; }
+.mini-action:disabled,.lock-action:disabled { opacity:.42; cursor:not-allowed; }
+.camera-feature-control small,.interval-control small { color:#727d91; font-size:9px; font-weight:600; }
+.lock-control-group { display:grid; grid-template-columns:1fr; gap:6px; min-width:145px; align-content:center; }
+.enhanced-frames-layout { display:grid; grid-template-columns:minmax(245px,280px) minmax(420px,1fr) 235px; gap:12px; min-width:930px; }
+.extended-actions-rail { min-width:0; }
+.extended-actions-rail .frame-action-buttons { grid-template-columns:repeat(5,minmax(58px,1fr)); }
+.edit-selects { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; margin-top:8px; }
+.edit-selects label { display:grid; grid-template-columns:auto 1fr; align-items:center; gap:7px; color:#828ca0; font-size:10px; }
+.edit-selects select { min-width:0; border:1px solid #2c3445; background:#111620; color:#e7ebf3; border-radius:7px; padding:6px; font-size:10px; }
+.color-editor { border-left:1px solid #242b39; padding-left:12px; min-width:0; display:grid; align-content:start; gap:5px; }
+.color-editor-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:2px; }
+.color-editor-head strong { font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:#98a2b5; }
+.color-editor button { min-height:25px; padding:4px 8px; font-size:9px; }
+.color-editor label { display:grid; gap:2px; }
+.color-editor label>span { display:flex; justify-content:space-between; color:#7d879a; font-size:9px; }
+.color-editor label b { color:#93c5fd; font-variant-numeric:tabular-nums; }
+.color-editor input { width:100%; accent-color:#3b82f6; }
+.frame-card img { filter:var(--frame-filter,none); }
+.frame-freeze-badge { position:absolute; right:5px; top:5px; padding:3px 6px; border-radius:999px; background:rgba(109,40,217,.9); border:1px solid rgba(196,181,253,.42); color:white; font-size:9px; font-weight:900; box-shadow:0 3px 12px rgba(0,0,0,.25); }
+.export-dialog-wide { width:min(780px,calc(100vw - 28px)); }
+.enhanced-export-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.enhanced-export-grid .featured { border-color:#40567a; background:linear-gradient(145deg,#151d2d,#111620); }
+.enhanced-export-grid .export-icon { min-width:40px; }
+@media (max-width:1100px) { .enhanced-frames-layout { grid-template-columns:240px minmax(380px,1fr) 210px; min-width:860px; } .extended-actions-rail .frame-action-buttons { grid-template-columns:repeat(3,minmax(58px,1fr)); } }
+@media (max-width:900px) { .feature-control { min-width:200px; } .interval-control { min-width:255px; } .enhanced-frames-layout { min-width:820px; grid-template-columns:230px 380px 190px; } .color-editor { padding-left:10px; } .enhanced-export-grid { grid-template-columns:1fr; } }
+@media (orientation:landscape) and (max-height:520px) { .enhanced-frames-layout { min-width:790px; grid-template-columns:220px 360px 190px; gap:8px; } .color-editor { gap:2px; } .color-editor label>span { font-size:8px; } .edit-selects { margin-top:4px; } }
