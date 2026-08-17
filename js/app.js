@@ -5,6 +5,8 @@ import { saveLocalProject, getLatestProject } from './project-store.js';
 const $ = selector => document.querySelector(selector);
 const els = {
   projectName: $('#projectName'),
+  settingsBtn: $('#settingsBtn'),
+  sidePanel: $('#sidePanel'),
   newProjectBtn: $('#newProjectBtn'),
   openProjectBtn: $('#openProjectBtn'),
   saveProjectBtn: $('#saveProjectBtn'),
@@ -349,8 +351,12 @@ function newProject() {
 
 async function exportVideo() {
   if (!project.frames.length) return;
-  const supported = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'].find(type => MediaRecorder.isTypeSupported(type));
-  if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream || !supported) {
+  if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) {
+    showToast('Bu tarayıcı doğrudan WebM video dışa aktarmayı desteklemiyor.');
+    return;
+  }
+  const supported = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'].find(type => window.MediaRecorder.isTypeSupported(type));
+  if (!supported) {
     showToast('Bu tarayıcı doğrudan WebM video dışa aktarmayı desteklemiyor.');
     return;
   }
@@ -413,6 +419,7 @@ function downloadBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+els.settingsBtn.addEventListener('click', () => els.sidePanel.classList.toggle('open'));
 els.newProjectBtn.addEventListener('click', newProject);
 els.openProjectBtn.addEventListener('click', openProjectFile);
 els.saveProjectBtn.addEventListener('click', saveProject);
