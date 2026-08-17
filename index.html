@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0d12" />
+  <meta name="description" content="Ahmed Enes Film Sahnesi - tarayıcıda stop-motion film stüdyosu" />
+  <title>Ahmed Enes Film Sahnesi</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Ahmed Enes Film Sahnesi">
+        <div class="brand-mark">AE</div>
+        <div>
+          <strong>Ahmed Enes</strong>
+          <span>Film Sahnesi</span>
+        </div>
+      </div>
+
+      <label class="project-name-wrap">
+        <span>Proje</span>
+        <input id="projectName" class="project-name" value="Yeni Film" maxlength="60" />
+      </label>
+
+      <div class="top-actions">
+        <button class="icon-btn" id="newProjectBtn" title="Yeni proje" aria-label="Yeni proje">＋</button>
+        <button class="btn" id="openProjectBtn">Aç</button>
+        <button class="btn primary" id="saveProjectBtn">Kaydet</button>
+        <button class="btn accent" id="exportBtn">Video</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="side-panel" id="sidePanel">
+        <section class="panel-section">
+          <h2>Sahne</h2>
+          <div class="setting-row">
+            <span>FPS</span>
+            <div class="range-with-value">
+              <input id="fpsInput" type="range" min="1" max="30" value="12" />
+              <strong id="fpsValue">12</strong>
+            </div>
+          </div>
+          <div class="setting-row">
+            <span>Onion Skin</span>
+            <div class="range-with-value">
+              <input id="onionInput" type="range" min="0" max="90" value="35" />
+              <strong id="onionValue">35%</strong>
+            </div>
+          </div>
+          <label class="toggle-row">
+            <span>Izgara</span>
+            <input id="gridToggle" type="checkbox" />
+          </label>
+          <label class="toggle-row">
+            <span>Ayna</span>
+            <input id="mirrorToggle" type="checkbox" checked />
+          </label>
+        </section>
+
+        <section class="panel-section">
+          <h2>Kare</h2>
+          <button class="panel-btn" id="duplicateBtn">Kareyi çoğalt</button>
+          <button class="panel-btn" id="moveLeftBtn">Sola taşı</button>
+          <button class="panel-btn" id="moveRightBtn">Sağa taşı</button>
+          <button class="panel-btn danger" id="deleteFrameBtn">Kareyi sil</button>
+        </section>
+
+        <section class="panel-section compact-stats">
+          <h2>Proje</h2>
+          <div><span>Kare</span><strong id="frameCount">0</strong></div>
+          <div><span>Süre</span><strong id="durationValue">0.0 sn</strong></div>
+          <div><span>Durum</span><strong id="saveStatus">Hazır</strong></div>
+        </section>
+      </aside>
+
+      <section class="stage-column">
+        <div class="stage-toolbar">
+          <div class="camera-state"><span class="status-dot" id="statusDot"></span><span id="cameraStatus">Kamera kapalı</span></div>
+          <div class="stage-toolbar-actions">
+            <button class="ghost-btn" id="switchCameraBtn">Kamera değiştir</button>
+            <button class="ghost-btn" id="fullscreenBtn">Tam ekran</button>
+          </div>
+        </div>
+
+        <div class="stage" id="stage">
+          <video id="cameraVideo" autoplay muted playsinline></video>
+          <img id="framePreview" alt="Seçili kare" />
+          <img id="onionLayer" alt="Önceki kare katmanı" />
+          <div class="grid-overlay" id="gridOverlay" aria-hidden="true"></div>
+          <div class="stage-empty" id="stageEmpty">
+            <div class="camera-glyph">◉</div>
+            <strong>Film sahnen hazır</strong>
+            <span>Kamerayı aç ve ilk kareyi çek.</span>
+          </div>
+          <div class="countdown" id="countdown"></div>
+          <div class="frame-badge" id="frameBadge">Kare 0</div>
+        </div>
+
+        <div class="capture-bar">
+          <button class="round secondary" id="previousBtn" aria-label="Önceki kare">‹</button>
+          <button class="camera-toggle" id="cameraToggleBtn">Kamerayı Aç</button>
+          <button class="capture" id="captureBtn" aria-label="Kare çek"><span></span></button>
+          <button class="camera-toggle subtle" id="timerBtn" aria-pressed="false">3 sn</button>
+          <button class="round secondary" id="nextBtn" aria-label="Sonraki kare">›</button>
+        </div>
+      </section>
+    </main>
+
+    <section class="timeline-dock" id="timelineDock">
+      <div class="timeline-header">
+        <div class="playback-controls">
+          <button class="play-btn" id="playBtn">▶</button>
+          <button class="small-btn" id="goStartBtn">|‹</button>
+          <span id="playbackPosition">00:00.0</span>
+        </div>
+        <div class="timeline-title">Timeline <span id="timelineHint">Kareleri sürükleyerek sırala</span></div>
+        <button class="collapse-btn" id="collapseTimelineBtn" aria-expanded="true">⌄</button>
+      </div>
+      <div class="timeline-body" id="timelineBody">
+        <div class="timeline-track" id="timelineTrack"></div>
+      </div>
+    </section>
+  </div>
+
+  <input id="projectFileInput" type="file" accept="application/json,.json" hidden />
+  <canvas id="captureCanvas" hidden></canvas>
+  <canvas id="exportCanvas" hidden></canvas>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
