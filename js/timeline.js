@@ -32,7 +32,7 @@ export class Timeline {
     if (!this.frames.length) {
       const empty = document.createElement('div');
       empty.className = 'timeline-empty';
-      empty.innerHTML = '<strong>Timeline boş</strong><span>Kamerayı açıp ilk kareyi çek.</span>';
+      empty.innerHTML = '<strong>Timeline boş</strong><span>Kamerayı aç veya fotoğraf içe aktar.</span>';
       this.track.append(empty);
       return;
     }
@@ -52,8 +52,17 @@ export class Timeline {
       const badge = document.createElement('span');
       badge.className = 'frame-index';
       badge.textContent = String(index + 1).padStart(3, '0');
-
       button.append(img, badge);
+
+      const hold = Math.max(1, Number(frame.hold) || 1);
+      if (hold > 1) {
+        const freeze = document.createElement('span');
+        freeze.className = 'frame-freeze-badge';
+        freeze.textContent = `×${hold}`;
+        freeze.title = `Bu kare ${hold} kare süresi tutulur`;
+        button.append(freeze);
+      }
+
       button.addEventListener('click', () => this.handlers.onSelect?.(index));
       button.addEventListener('dblclick', () => this.handlers.onDuplicate?.(index));
       button.addEventListener('dragstart', event => {
