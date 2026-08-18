@@ -9,13 +9,14 @@ import './sfx-preview.js';
 import './audio-timeline-tweak.js';
 import './audio-workspace.js';
 
-const audioWorkspaceStyle='./audio-workspace.css';
-if(!document.querySelector(`link[href="${audioWorkspaceStyle}"]`)){
+const extraStyles=['./audio-workspace.css','./camera-no-blue.css'];
+extraStyles.forEach(href=>{
+  if(document.querySelector(`link[href="${href}"]`))return;
   const link=document.createElement('link');
   link.rel='stylesheet';
-  link.href=audioWorkspaceStyle;
+  link.href=href;
   document.head.append(link);
-}
+});
 
 const dock=document.getElementById('timelineDock');
 const collapseButton=document.getElementById('collapseTimelineBtn');
