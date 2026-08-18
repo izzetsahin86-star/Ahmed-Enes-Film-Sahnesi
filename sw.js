@@ -1,5 +1,5 @@
-const CACHE = 'aefs-studio-v5';
-const ASSETS = ['./', './index.html', './styles.css', './studio-shell.css', './life-lapse.css', './audio-studio.css', './camera-simple.css', './js/app.js', './js/camera.js', './js/timeline.js', './js/gif-encoder.js', './js/project-store.js', './js/ui-shell.js', './js/audio-addon.js', './js/camera-simple.js', './manifest.webmanifest', './icon.svg'];
+const CACHE = 'aefs-studio-v6';
+const ASSETS = ['./', './index.html', './styles.css', './studio-shell.css', './life-lapse.css', './audio-studio.css', './camera-simple.css', './camera-tweaks.css', './js/app.js', './js/camera.js', './js/timeline.js', './js/gif-encoder.js', './js/project-store.js', './js/ui-shell.js', './js/audio-addon.js', './js/camera-simple.js', './js/camera-tweaks.js', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting())));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', event => {
