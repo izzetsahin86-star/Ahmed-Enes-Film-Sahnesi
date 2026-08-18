@@ -3,6 +3,7 @@ import './camera-tweaks.js';
 import './studio-ux.js';
 import './modern-sheet.js';
 import './ninja-sfx.js';
+import './sfx-preview.js';
 
 const dock=document.getElementById('timelineDock');
 const collapseButton=document.getElementById('collapseTimelineBtn');
