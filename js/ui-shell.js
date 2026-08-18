@@ -9,6 +9,7 @@ import './sfx-preview.js';
 import './audio-timeline-tweak.js';
 import './audio-workspace.js';
 import './scene-addon.js';
+import './startup-camera-defaults.js';
 
 const extraStyles=['./audio-workspace.css','./camera-no-blue.css','./scene-studio.css'];
 extraStyles.forEach(href=>{
