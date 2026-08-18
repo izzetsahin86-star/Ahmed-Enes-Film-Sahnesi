@@ -1,5 +1,6 @@
 import './camera-simple.js';
 import './camera-tweaks.js';
+import './studio-ux.js';
 
 const dock=document.getElementById('timelineDock');
 const collapseButton=document.getElementById('collapseTimelineBtn');
@@ -36,6 +37,7 @@ function expandDock(){
 function activateDock(name,{expand=true}={}){
   tabs.forEach(tab=>{const active=tab.dataset.dockTab===name;tab.classList.toggle('active',active);tab.setAttribute('aria-selected',String(active));});
   panels.forEach(panel=>panel.classList.toggle('active',panel.dataset.dockPanel===name));
+  document.body.dataset.studioPanel=name;
   try{localStorage.setItem('aefs-active-dock',name);}catch{}
   if(expand)expandDock();
 }
