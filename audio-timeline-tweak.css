@@ -1,0 +1,56 @@
+/* Ses Zaman Çizelgesi — daha büyük ve erişilebilir düzen */
+body[data-studio-panel="audio"] .studio-dock:not(.collapsed){height:min(56dvh,560px)!important}
+
+/* Zaman çizelgesini Ses sekmesinde ilk ve en geniş kart yap */
+.audio-layout>.audio-card:last-child{
+  order:-1!important;
+  flex:0 0 min(92vw,520px)!important;
+  min-width:min(92vw,520px)!important;
+  overflow:hidden!important;
+  display:grid!important;
+  grid-template-rows:auto minmax(0,1fr) auto!important;
+}
+.audio-layout>.audio-card:not(:last-child){flex-basis:min(78vw,310px)!important}
+.audio-status-row{padding:3px 3px 10px!important;position:sticky;top:0;z-index:2;background:linear-gradient(180deg,rgba(13,27,49,.98),rgba(13,27,49,.84))!important}
+.audio-status-row strong{font-size:13px!important}
+.audio-status-row span{font-size:10px!important}
+.audio-track-list{min-height:0!important;overflow:auto!important;padding:9px 2px 10px!important;gap:8px!important}
+.audio-empty{min-height:96px!important;margin-top:6px!important}
+
+/* Klip satırında Play ve X en başta */
+.audio-clip-row{
+  grid-template-columns:64px minmax(170px,1fr) 86px minmax(110px,.75fr)!important;
+  gap:8px!important;
+  padding:9px!important;
+  min-width:430px!important;
+}
+.audio-row-actions{
+  grid-column:1!important;
+  grid-row:1!important;
+  order:-1!important;
+  justify-content:flex-start!important;
+  align-items:center!important;
+  gap:5px!important;
+}
+.audio-row-actions button{
+  width:29px!important;
+  height:29px!important;
+  border-radius:9px!important;
+  font-size:13px!important;
+  flex:0 0 auto!important;
+}
+.audio-row-actions button:first-child{background:rgba(22,136,255,.14)!important;border-color:rgba(73,157,255,.30)!important;color:#dceeff!important}
+.audio-row-actions button:last-child{background:rgba(239,68,68,.08)!important;border-color:rgba(239,68,68,.20)!important;color:#fecaca!important}
+.audio-clip-main{grid-column:2!important;grid-row:1!important}
+.audio-mini-field{grid-column:3!important;grid-row:1!important}
+.audio-volume-field{grid-column:4!important;grid-row:1!important}
+.audio-kind{width:32px!important;height:32px!important}
+.audio-clip-main strong{font-size:11px!important}
+.audio-clip-main small{font-size:8.5px!important}
+
+@media(max-width:600px){
+  body[data-studio-panel="audio"] .studio-dock:not(.collapsed){height:min(60dvh,590px)!important}
+  .audio-layout>.audio-card:last-child{flex-basis:min(94vw,540px)!important;min-width:min(94vw,540px)!important}
+  .audio-layout>.audio-card:not(:last-child){flex-basis:min(82vw,300px)!important}
+  .audio-clip-row{min-width:410px!important;grid-template-columns:62px minmax(150px,1fr) 78px 105px!important}
+}
