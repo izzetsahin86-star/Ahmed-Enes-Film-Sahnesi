@@ -1,4 +1,5 @@
 import './camera-simple.js';
+import './camera-tweaks.js';
 
 const dock=document.getElementById('timelineDock');
 const collapseButton=document.getElementById('collapseTimelineBtn');
