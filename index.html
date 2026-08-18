@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./studio-shell.css" />
   <link rel="stylesheet" href="./life-lapse.css" />
+  <link rel="stylesheet" href="./audio-studio.css" />
 </head>
 <body>
   <div class="app-shell studio-shell">
@@ -74,6 +75,7 @@
         <nav class="dock-tabs" aria-label="Stüdyo araçları">
           <button class="dock-tab active" type="button" data-dock-tab="shoot" aria-selected="true"><span>◉</span><b>Çekim</b></button>
           <button class="dock-tab" type="button" data-dock-tab="frames" aria-selected="false"><span>▦</span><b>Kareler</b></button>
+          <button class="dock-tab" type="button" data-dock-tab="audio" aria-selected="false"><span>♫</span><b>Ses</b></button>
           <button class="dock-tab" type="button" data-dock-tab="project" aria-selected="false"><span>◇</span><b>Proje</b></button>
           <button class="dock-tab" type="button" data-dock-tab="export" aria-selected="false"><span>↗</span><b>Dışa Aktar</b></button>
         </nav>
@@ -89,23 +91,19 @@
             <div class="dock-control range-control"><div class="dock-control-head"><span>FPS</span><strong id="fpsValue">12</strong></div><input id="fpsInput" type="range" min="1" max="30" value="12" /></div>
             <div class="dock-control range-control"><div class="dock-control-head"><span>Onion Skin</span><strong id="onionValue">35%</strong></div><input id="onionInput" type="range" min="0" max="90" value="35" /></div>
             <label class="dock-control"><span>Sayaç</span><select id="timerSelect"><option value="0">Kapalı</option><option value="2">2 saniye</option><option value="3" selected>3 saniye</option><option value="5">5 saniye</option><option value="10">10 saniye</option></select></label>
-
             <div class="dock-control feature-control interval-control">
               <div class="dock-control-head"><span>Interval Çekim</span><small id="intervalStatus">Kapalı</small></div>
               <div class="inline-control"><select id="intervalSelect"><option value="0">Kapalı</option><option value="0.5">0.5 sn</option><option value="1">1 sn</option><option value="2">2 sn</option><option value="3">3 sn</option><option value="5">5 sn</option><option value="10">10 sn</option></select><button id="intervalStartBtn" class="mini-action" type="button" disabled>Interval Başlat</button></div>
             </div>
-
             <div class="dock-control range-control camera-feature-control">
               <div class="dock-control-head"><span>Kamera Zoom</span><strong id="zoomValue">1.0×</strong></div>
               <input id="zoomInput" type="range" min="1" max="1" step="0.1" value="1" disabled />
               <small id="zoomSupport">Kamerayı açınca kontrol edilir</small>
             </div>
-
             <div class="lock-control-group">
               <button id="exposureLockBtn" class="lock-action" type="button" disabled>Pozlama kilidi</button>
               <button id="whiteBalanceLockBtn" class="lock-action" type="button" disabled>Beyaz ayarı kilidi</button>
             </div>
-
             <label class="dock-toggle"><input id="gridToggle" type="checkbox" /><span><b>Izgara</b><small>Üçler kuralı</small></span></label>
             <label class="dock-toggle"><input id="mirrorToggle" type="checkbox" checked /><span><b>Ayna</b><small>Ön kamera</small></span></label>
           </div>
@@ -125,18 +123,55 @@
                 <label><span>Oynatma</span><select id="playbackModeSelect"><option value="normal">Normal</option><option value="reverse">Reverse</option><option value="boomerang">Boomerang</option></select></label>
               </div>
             </div>
-
             <div class="timeline-zone">
               <div class="timeline-mini-head"><span>Kare Zaman Çizelgesi</span><label><span>−</span><input id="timelineZoom" type="range" min="0" max="100" value="45" /><span>＋</span></label></div>
               <div class="timeline-body" id="timelineBody"><div class="timeline-track" id="timelineTrack"></div></div>
             </div>
-
             <div class="color-editor">
               <div class="color-editor-head"><strong>Renk</strong><button id="resetColorBtn" type="button">Sıfırla</button></div>
               <label><span>Parlaklık <b id="brightnessValue">0</b></span><input id="brightnessInput" type="range" min="-50" max="50" value="0" /></label>
               <label><span>Kontrast <b id="contrastValue">0</b></span><input id="contrastInput" type="range" min="-50" max="50" value="0" /></label>
               <label><span>Doygunluk <b id="saturationValue">0</b></span><input id="saturationInput" type="range" min="-100" max="100" value="0" /></label>
               <label><span>Sıcaklık <b id="warmthValue">0</b></span><input id="warmthInput" type="range" min="-100" max="100" value="0" /></label>
+            </div>
+          </div>
+        </section>
+
+        <section class="dock-pane audio-pane" data-dock-panel="audio">
+          <div class="audio-layout">
+            <div class="audio-card">
+              <div class="audio-card-head"><strong>Ses Kaynakları</strong><span class="audio-badge">STUDIO</span></div>
+              <div class="audio-primary-actions">
+                <button class="audio-action" id="musicImportBtn" type="button"><span>♫</span><b>Müzik Ekle</b></button>
+                <button class="audio-action" id="soundImportBtn" type="button"><span>＋</span><b>Ses Ekle</b></button>
+                <button class="audio-action" id="micRecordBtn" type="button"><span>●</span><b>Mikrofon Kaydı</b></button>
+              </div>
+              <div class="audio-master-row"><label class="audio-slider"><div class="slider-head"><span>Ana Ses</span><strong id="masterVolumeValue">90%</strong></div><input id="masterVolume" type="range" min="0" max="100" value="90" /></label></div>
+              <p class="audio-hint">Ses veya efekt eklediğinde mevcut oynatma konumuna yerleşir. Klip başlangıcını sonradan değiştirebilirsin.</p>
+            </div>
+
+            <div class="audio-card">
+              <div class="audio-card-head"><strong>Müzik & Efekt</strong><small>Arka plan + hızlı efektler</small></div>
+              <div class="music-summary"><div id="musicInfo"><strong>Müzik yok</strong><span>MP3, M4A, WAV veya desteklenen ses dosyası</span></div><button id="removeMusicBtn" type="button" disabled title="Müziği kaldır">×</button></div>
+              <label class="audio-slider"><div class="slider-head"><span>Müzik Sesi</span><strong id="musicVolumeValue">70%</strong></div><input id="musicVolume" type="range" min="0" max="100" value="70" disabled /></label>
+              <div class="music-controls">
+                <label><span>Başlangıç (sn)</span><input id="musicStartInput" type="number" min="0" step="0.1" value="0" disabled /></label>
+                <label class="music-loop"><input id="musicLoopToggle" type="checkbox" checked disabled /><span>Döngü</span></label>
+              </div>
+              <div class="audio-card-head" style="margin-top:9px"><strong>Hazır Efektler</strong><small>Oynatma konumuna ekle</small></div>
+              <div class="sfx-grid">
+                <button class="sfx-pad" data-sfx="click" type="button"><span>•</span>Klik</button>
+                <button class="sfx-pad" data-sfx="pop" type="button"><span>●</span>Pop</button>
+                <button class="sfx-pad" data-sfx="whoosh" type="button"><span>≈</span>Whoosh</button>
+                <button class="sfx-pad" data-sfx="beep" type="button"><span>⌁</span>Beep</button>
+                <button class="sfx-pad" data-sfx="shutter" type="button"><span>◉</span>Kamera</button>
+              </div>
+            </div>
+
+            <div class="audio-card">
+              <div class="audio-status-row"><div><strong>Ses Zaman Çizelgesi</strong><span id="audioStatus">0 klip</span></div><span id="audioSize">0 KB</span></div>
+              <div class="audio-track-list" id="audioClipList"></div>
+              <div class="audio-empty" id="audioEmpty">Henüz ses klibi yok. Ses dosyası, mikrofon kaydı veya efekt ekle.</div>
             </div>
           </div>
         </section>
@@ -159,9 +194,9 @@
 
         <section class="dock-pane export-pane" data-dock-panel="export">
           <div class="export-dock-layout">
-            <button class="export-launch" id="exportBtn"><span>↗</span><div><b>Filmi Dışa Aktar</b><small>MP4, GIF, WebM, proje veya kare</small></div></button>
+            <button class="export-launch" id="exportBtn"><span>↗</span><div><b>Filmi Dışa Aktar</b><small>MP4/WebM + ses, GIF, proje veya kare</small></div></button>
             <button class="shortcut-launch" type="button" data-open-shortcuts><span>⌨</span><div><b>Kısayollar</b><small>Space çekim · I interval · P oynat</small></div></button>
-            <div class="privacy-note"><span>●</span> Görüntüler cihazında işlenir; sunucuya yüklenmez.</div>
+            <div class="privacy-note"><span>●</span> Görüntü ve sesler cihazında işlenir; sunucuya yüklenmez.</div>
           </div>
         </section>
       </div>
@@ -171,13 +206,13 @@
   <dialog class="studio-dialog export-dialog-wide" id="exportDialog">
     <div class="dialog-head"><div><span class="eyebrow">DIŞA AKTAR</span><h3>Filmini paylaş</h3></div><button class="icon-btn" data-close-dialog="exportDialog">×</button></div>
     <div class="export-grid enhanced-export-grid">
-      <button class="export-card featured" id="exportMp4Btn"><span class="export-icon">▶</span><div><strong>MP4 Video</strong><small>Destekleyen tarayıcılarda H.264/MP4</small></div></button>
-      <button class="export-card featured" id="exportGifBtn"><span class="export-icon">GIF</span><div><strong>Animasyonlu GIF</strong><small>640 px · döngülü</small></div></button>
-      <button class="export-card" id="exportWebmBtn"><span class="export-icon">W</span><div><strong>WebM Video</strong><small>MP4 desteklenmezse güvenli alternatif</small></div></button>
-      <button class="export-card" id="exportProjectBtn"><span class="export-icon">◇</span><div><strong>Proje dosyası</strong><small>.aefs.json · tekrar düzenlenebilir</small></div></button>
+      <button class="export-card featured" id="exportMp4Btn"><span class="export-icon">▶</span><div><strong>MP4 Video</strong><small>Desteklenirse müzik + ses + efekt dahil</small></div></button>
+      <button class="export-card featured" id="exportGifBtn"><span class="export-icon">GIF</span><div><strong>Animasyonlu GIF</strong><small>640 px · GIF formatı sessizdir</small></div></button>
+      <button class="export-card" id="exportWebmBtn"><span class="export-icon">W</span><div><strong>WebM Video</strong><small>Müzik + ses + efekt dahil</small></div></button>
+      <button class="export-card" id="exportProjectBtn"><span class="export-icon">◇</span><div><strong>Proje dosyası</strong><small>.aefs.json · sesler dahil</small></div></button>
       <button class="export-card" id="exportFrameBtn"><span class="export-icon">▣</span><div><strong>Seçili kare</strong><small>JPEG · renk ayarları uygulanmış</small></div></button>
     </div>
-    <p class="dialog-note">MP4 desteği cihaz ve tarayıcıya bağlıdır. Uygulama önce tarayıcının desteklediği MIME türünü kontrol eder; destek yoksa GIF veya WebM kullanılabilir.</p>
+    <p class="dialog-note">MP4 ses desteği cihaz ve tarayıcıya bağlıdır. Destek yoksa WebM kullanılabilir. GIF standardı ses kanalı içermez.</p>
   </dialog>
 
   <dialog class="studio-dialog shortcuts-dialog" id="shortcutsDialog">
@@ -187,8 +222,10 @@
 
   <input id="projectFileInput" type="file" accept="application/json,.json" hidden />
   <input id="photoImportInput" type="file" accept="image/*" multiple hidden />
+  <input id="musicFileInput" type="file" accept="audio/*" hidden />
+  <input id="soundFileInput" type="file" accept="audio/*" hidden />
   <canvas id="captureCanvas" hidden></canvas><canvas id="exportCanvas" hidden></canvas><canvas id="workCanvas" hidden></canvas>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./js/app.js"></script><script type="module" src="./js/ui-shell.js"></script>
+  <script type="module" src="./js/app.js"></script><script type="module" src="./js/ui-shell.js"></script><script type="module" src="./js/audio-addon.js"></script>
 </body>
 </html>
