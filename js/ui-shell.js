@@ -6,6 +6,15 @@ import './modern-sheet.js';
 import './ninja-sfx.js';
 import './sfx-preview.js';
 import './audio-timeline-tweak.js';
+import './audio-workspace.js';
+
+const audioWorkspaceStyle='./audio-workspace.css';
+if(!document.querySelector(`link[href="${audioWorkspaceStyle}"]`)){
+  const link=document.createElement('link');
+  link.rel='stylesheet';
+  link.href=audioWorkspaceStyle;
+  document.head.append(link);
+}
 
 const dock=document.getElementById('timelineDock');
 const collapseButton=document.getElementById('collapseTimelineBtn');
