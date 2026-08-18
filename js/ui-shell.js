@@ -1,3 +1,4 @@
+import './quality-guard.js';
 import './camera-simple.js';
 import './camera-tweaks.js';
 import './studio-ux.js';
