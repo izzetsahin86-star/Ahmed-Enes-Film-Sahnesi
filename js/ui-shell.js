@@ -4,6 +4,7 @@ import './studio-ux.js';
 import './modern-sheet.js';
 import './ninja-sfx.js';
 import './sfx-preview.js';
+import './audio-timeline-tweak.js';
 
 const dock=document.getElementById('timelineDock');
 const collapseButton=document.getElementById('collapseTimelineBtn');
