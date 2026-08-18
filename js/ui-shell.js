@@ -10,8 +10,9 @@ import './audio-timeline-tweak.js';
 import './audio-workspace.js';
 import './scene-addon.js';
 import './startup-camera-defaults.js';
+import './playback-duration.js';
 
-const extraStyles=['./audio-workspace.css','./camera-no-blue.css','./scene-studio.css'];
+const extraStyles=['./audio-workspace.css','./camera-no-blue.css','./scene-studio.css','./playback-duration.css'];
 extraStyles.forEach(href=>{
   if(document.querySelector(`link[href="${href}"]`))return;
   const link=document.createElement('link');
