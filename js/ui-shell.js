@@ -1,3 +1,5 @@
+import './camera-simple.js';
+
 const dock=document.getElementById('timelineDock');
 const collapseButton=document.getElementById('collapseTimelineBtn');
 const tabs=[...document.querySelectorAll('[data-dock-tab]')];
