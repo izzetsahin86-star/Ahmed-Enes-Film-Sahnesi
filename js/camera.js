@@ -4,6 +4,8 @@ const RESOLUTIONS = {
   2160: { width: 3840, height: 2160, minWidth: 1920, minHeight: 1080 }
 };
 
+const AUTO_MAX = { width: 4096, height: 3072 };
+
 export class CameraController {
   constructor(videoElement) {
     this.video = videoElement;
@@ -11,6 +13,8 @@ export class CameraController {
     this.facingMode = 'environment';
     this.deviceId = '';
     this.resolution = '1080';
+    this.autoQuality = true;
+    this.actualResolution = { width: 0, height: 0 };
   }
 
   get active() { return Boolean(this.stream); }
@@ -23,8 +27,7 @@ export class CameraController {
     this.deviceId = options.deviceId ?? this.deviceId;
     const preset = RESOLUTIONS[this.resolution] || RESOLUTIONS[1080];
 
-    // Önce gerçek HD çözünürlüğü koruyan daha güçlü kısıtları dene.
-    // Cihaz bunu karşılayamazsa ideal kısıtlara otomatik geri dön.
+    // İlk açılışta yüksek kalite hedefle; cihaz karşılayamazsa güvenli biçimde geri dön.
     const strongVideo = this.buildVideoConstraints(preset, true);
     const fallbackVideo = this.buildVideoConstraints(preset, false);
     try {
@@ -35,29 +38,79 @@ export class CameraController {
     }
 
     const track = this.track;
-    // Stop-motion için hareket akıcılığından çok uzamsal detay önemlidir.
     try { if (track && 'contentHint' in track) track.contentHint = 'detail'; } catch {}
 
     this.video.srcObject = this.stream;
     await this.video.play();
+
+    // Hangi telefon kullanılıyorsa o cihazın tarayıcı üzerinden erişilebilen en yüksek
+    // kamera çözünürlüğünü otomatik seç. Stop-motion için FPS yerine detay önceliklidir.
+    await this.maximizeDeviceResolution();
     await this.applyPreferredCameraModes();
-    // Kamera açıldıktan hemen sonra ilk kareyi bulanık almamak için kısa yerleşme süresi.
-    await wait(140);
+    await wait(220);
+    this.syncActualResolution();
     return this.stream;
   }
 
   buildVideoConstraints(preset, strong = false) {
     const supported = navigator.mediaDevices?.getSupportedConstraints?.() || {};
     const video = {
-      width: strong ? { min: preset.minWidth, ideal: preset.width } : { ideal: preset.width },
-      height: strong ? { min: preset.minHeight, ideal: preset.height } : { ideal: preset.height },
-      frameRate: { ideal: 30 }
+      width: strong
+        ? { min: preset.minWidth, ideal: Math.max(preset.width, 3840) }
+        : { ideal: Math.max(preset.width, 1920) },
+      height: strong
+        ? { min: preset.minHeight, ideal: Math.max(preset.height, 2160) }
+        : { ideal: Math.max(preset.height, 1080) },
+      frameRate: { ideal: 24, max: 30 }
     };
     if (supported.resizeMode) video.resizeMode = 'none';
     if (this.deviceId) video.deviceId = { exact: this.deviceId };
     else video.facingMode = { ideal: this.facingMode };
     return video;
   }
+
+  async maximizeDeviceResolution() {
+    const track = this.track;
+    if (!track?.applyConstraints || !this.autoQuality) return;
+    const caps = this.getCapabilities();
+    const maxW = Number(caps.width?.max);
+    const maxH = Number(caps.height?.max);
+    if (!Number.isFinite(maxW) || !Number.isFinite(maxH) || maxW <= 0 || maxH <= 0) {
+      this.syncActualResolution();
+      return;
+    }
+
+    const scale = Math.min(1, AUTO_MAX.width / maxW, AUTO_MAX.height / maxH);
+    const targetW = Math.max(1, Math.round(maxW * scale));
+    const targetH = Math.max(1, Math.round(maxH * scale));
+    const supported = navigator.mediaDevices?.getSupportedConstraints?.() || {};
+    const constraints = {
+      width: { ideal: targetW },
+      height: { ideal: targetH },
+      frameRate: { ideal: 24, max: 30 }
+    };
+    if (supported.resizeMode) constraints.resizeMode = 'none';
+
+    try {
+      await track.applyConstraints(constraints);
+      await wait(120);
+    } catch {
+      // Bazı mobil tarayıcılar maksimum width/height çiftini birlikte kabul etmez.
+      // Böyle bir durumda mevcut yüksek kaliteli akışı bozmadan devam et.
+    }
+    this.syncActualResolution();
+  }
+
+  syncActualResolution() {
+    const settings = this.getSettings();
+    this.actualResolution = {
+      width: Number(settings.width) || Number(this.video.videoWidth) || 0,
+      height: Number(settings.height) || Number(this.video.videoHeight) || 0
+    };
+    return this.actualResolution;
+  }
+
+  getActualResolution() { return { ...this.syncActualResolution() }; }
 
   async applyPreferredCameraModes() {
     const track = this.track;
@@ -80,6 +133,7 @@ export class CameraController {
       this.stream = null;
     }
     this.video.srcObject = null;
+    this.actualResolution = { width: 0, height: 0 };
   }
 
   async restart(options = {}) { return this.start(options); }
@@ -105,6 +159,7 @@ export class CameraController {
     const track = this.track;
     if (!track?.applyConstraints) throw new Error('Bu kamera gelişmiş ayarları desteklemiyor.');
     await track.applyConstraints({ advanced: [constraints] });
+    this.syncActualResolution();
     return this.getSettings();
   }
 
@@ -137,15 +192,15 @@ export class CameraController {
     return this.applyAdvanced({ whiteBalanceMode: desired });
   }
 
-  capture(canvas, { mirror = false, aspectRatio = '16:9', quality = 0.98 } = {}) {
+  capture(canvas, { mirror = false, aspectRatio = '16:9', quality = 0.99 } = {}) {
     if (!this.active || !this.video.videoWidth || !this.video.videoHeight) throw new Error('Kamera hazır değil.');
-    // Eski çağrılar %92 istese bile yeni kareleri yüksek JPEG kalitesinde sakla.
-    const finalQuality = Math.max(0.97, Math.min(1, Number(quality) || 0.98));
+    const finalQuality = Math.max(0.985, Math.min(1, Number(quality) || 0.99));
+    this.syncActualResolution();
     return drawSourceToCanvas(this.video, canvas, { mirror, aspectRatio, quality: finalQuality });
   }
 }
 
-export function drawSourceToCanvas(source, canvas, { mirror = false, aspectRatio = '16:9', quality = 0.98 } = {}) {
+export function drawSourceToCanvas(source, canvas, { mirror = false, aspectRatio = '16:9', quality = 0.99 } = {}) {
   const sourceW = source.videoWidth || source.naturalWidth || source.width;
   const sourceH = source.videoHeight || source.naturalHeight || source.height;
   if (!sourceW || !sourceH) throw new Error('Görüntü boyutu okunamadı.');
@@ -164,8 +219,8 @@ export function drawSourceToCanvas(source, canvas, { mirror = false, aspectRatio
   canvas.width = sw;
   canvas.height = sh;
   const ctx = canvas.getContext('2d', { alpha: false, desynchronized: false });
-  ctx.imageSmoothingEnabled = true;
-  if ('imageSmoothingQuality' in ctx) ctx.imageSmoothingQuality = 'high';
+  // Kareyi 1:1 piksel ölçüsünde alıyoruz; gereksiz interpolasyon bulanıklığını kapat.
+  ctx.imageSmoothingEnabled = false;
   ctx.save();
   if (mirror) {
     ctx.translate(canvas.width, 0);
@@ -173,7 +228,7 @@ export function drawSourceToCanvas(source, canvas, { mirror = false, aspectRatio
   }
   ctx.drawImage(source, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
   ctx.restore();
-  return canvas.toDataURL('image/jpeg', Math.max(0.97, Math.min(1, Number(quality) || 0.98)));
+  return canvas.toDataURL('image/jpeg', Math.max(0.985, Math.min(1, Number(quality) || 0.99)));
 }
 
 function parseAspect(value) {
