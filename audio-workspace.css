@@ -1,0 +1,76 @@
+/* Ahmed Enes Film Sahnesi — modern audio workspace */
+body[data-studio-panel="audio"] .studio-dock:not(.collapsed){height:min(70dvh,720px)!important}
+.audio-pane{padding:8px!important;overflow:hidden!important}
+.audio-pane .audio-layout{
+  width:100%!important;height:100%!important;min-width:0!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1.65fr) minmax(270px,.85fr)!important;
+  grid-template-rows:52px minmax(0,1fr) minmax(180px,.72fr)!important;
+  grid-template-areas:"nav nav" "timeline sources" "timeline library"!important;
+  gap:9px!important;padding:0!important;overflow:hidden!important;scroll-snap-type:none!important;
+}
+.audio-workspace-nav{
+  grid-area:nav;display:flex;align-items:center;gap:7px;padding:5px 7px;
+  border:1px solid rgba(255,255,255,.09);border-radius:15px;
+  background:rgba(255,255,255,.045);overflow-x:auto;scrollbar-width:none
+}
+.audio-workspace-nav::-webkit-scrollbar{display:none}
+.audio-workspace-nav button{height:38px;flex:0 0 auto;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:rgba(255,255,255,.04);color:rgba(238,245,255,.72);padding:0 12px;font-size:10px;font-weight:800;letter-spacing:.01em}
+.audio-workspace-nav button.primary{background:rgba(22,136,255,.17);border-color:rgba(67,158,255,.3);color:#fff}
+.audio-workspace-nav .audio-workspace-spacer{flex:1}
+.audio-workspace-nav .audio-workspace-summary{flex:0 0 auto;color:rgba(224,234,247,.55);font-size:9px;padding-right:5px;white-space:nowrap}
+.audio-pane .audio-card{width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;min-height:0!important;flex:none!important;border-radius:16px!important;background:rgba(9,20,36,.9)!important;overflow:auto!important;scroll-snap-align:none!important}
+.audio-pane .audio-card.audio-sources-card{grid-area:sources!important;padding:10px!important}
+.audio-pane .audio-card.audio-library-card{grid-area:library!important;padding:10px!important}
+.audio-pane .audio-card.audio-timeline-card{grid-area:timeline!important;padding:11px!important;display:grid!important;grid-template-rows:auto minmax(0,1fr) auto!important;overflow:hidden!important}
+.audio-timeline-card .audio-status-row{position:static!important;padding:2px 2px 10px!important;background:transparent!important}
+.audio-timeline-card .audio-status-row strong{font-size:14px!important}.audio-timeline-card .audio-status-row span{font-size:9px!important}
+.audio-timeline-card .audio-track-list{overflow:auto!important;overscroll-behavior:contain;padding:8px 2px 12px!important;display:grid!important;align-content:start!important;gap:8px!important}
+.audio-timeline-card .audio-empty{min-height:150px!important;background:rgba(255,255,255,.018)!important}
+/* Klipler artık yatay taşmaz: üstte aksiyon+isim, altta zaman+ses */
+.audio-timeline-card .audio-clip-row{
+  min-width:0!important;width:100%!important;
+  display:grid!important;grid-template-columns:64px minmax(0,1fr) 88px minmax(110px,.7fr)!important;
+  grid-template-rows:auto!important;gap:8px!important;align-items:center!important;
+  padding:9px!important;border-radius:12px!important;background:rgba(255,255,255,.035)!important
+}
+.audio-timeline-card .audio-row-actions{grid-column:1!important;grid-row:1!important;justify-content:flex-start!important}
+.audio-timeline-card .audio-clip-main{grid-column:2!important;grid-row:1!important}
+.audio-timeline-card .audio-mini-field{grid-column:3!important;grid-row:1!important}
+.audio-timeline-card .audio-volume-field{grid-column:4!important;grid-row:1!important}
+.audio-timeline-card .audio-row-actions button{width:30px!important;height:30px!important;border-radius:9px!important}
+.audio-timeline-card .audio-clip-main strong{font-size:11px!important}.audio-timeline-card .audio-clip-main small{font-size:8.5px!important}
+/* Kaynaklar kompakt hızlı işlem satırı */
+.audio-sources-card .audio-card-head{margin-bottom:7px!important}.audio-sources-card .audio-primary-actions{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}.audio-sources-card .audio-action{min-height:46px!important;border-radius:11px!important}.audio-sources-card .audio-action span{font-size:16px!important}.audio-sources-card .audio-action b{font-size:9px!important}.audio-sources-card .audio-hint{display:none!important}.audio-sources-card .audio-master-row{margin-top:4px!important}
+/* Efekt/müzik kartı: başlık ve arama sabit, içerik kayar */
+.audio-library-card{overscroll-behavior:contain!important}.audio-library-card .audio-card-head{margin-bottom:6px!important}.audio-library-card .ninja-sfx-library{gap:7px!important}.audio-library-card .ninja-sfx-toolbar{position:sticky;top:0;z-index:3;background:rgba(9,20,36,.96);padding-bottom:5px}.audio-library-card .ninja-sfx-pads{grid-template-columns:repeat(2,minmax(0,1fr))!important}.audio-library-card .ninja-sfx-pad{min-height:50px!important}.audio-library-card .ninja-sfx-note{display:none!important}
+@media(max-width:760px){
+  body[data-studio-panel="audio"] .studio-dock:not(.collapsed){height:min(74dvh,690px)!important}
+  .audio-pane{padding:6px!important}
+  .audio-pane .audio-layout{
+    grid-template-columns:1fr!important;
+    grid-template-rows:50px auto minmax(220px,1fr) minmax(190px,.8fr)!important;
+    grid-template-areas:"nav" "sources" "timeline" "library"!important;
+    gap:7px!important;overflow-y:auto!important;overflow-x:hidden!important;padding-bottom:4px!important
+  }
+  .audio-workspace-nav{position:sticky;top:0;z-index:6;border-radius:13px!important}
+  .audio-workspace-nav .audio-workspace-summary{display:none}
+  .audio-pane .audio-card.audio-sources-card{overflow:visible!important}
+  .audio-sources-card .audio-primary-actions{grid-template-columns:repeat(3,1fr)!important}
+  .audio-timeline-card{min-height:240px!important}
+  .audio-timeline-card .audio-clip-row{
+    grid-template-columns:62px minmax(0,1fr) 80px!important;
+    grid-template-rows:auto auto!important;gap:7px!important
+  }
+  .audio-timeline-card .audio-row-actions{grid-column:1!important;grid-row:1!important}
+  .audio-timeline-card .audio-clip-main{grid-column:2/4!important;grid-row:1!important}
+  .audio-timeline-card .audio-mini-field{grid-column:1/2!important;grid-row:2!important}
+  .audio-timeline-card .audio-volume-field{grid-column:2/4!important;grid-row:2!important}
+  .audio-library-card{min-height:210px!important;max-height:46vh!important}
+}
+@media(max-width:430px){
+  body[data-studio-panel="audio"] .studio-dock:not(.collapsed){height:min(77dvh,700px)!important}
+  .audio-workspace-nav button{padding:0 10px;font-size:9px}
+  .audio-sources-card .audio-action{min-height:43px!important}.audio-sources-card .audio-action b{font-size:8.5px!important}
+  .audio-library-card .ninja-sfx-pads{grid-template-columns:1fr 1fr!important}
+}
