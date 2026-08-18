@@ -1,7 +1,7 @@
 const RESOLUTIONS = {
-  720: { width: 1280, height: 720 },
-  1080: { width: 1920, height: 1080 },
-  2160: { width: 3840, height: 2160 }
+  720: { width: 1280, height: 720, minWidth: 960, minHeight: 540 },
+  1080: { width: 1920, height: 1080, minWidth: 1280, minHeight: 720 },
+  2160: { width: 3840, height: 2160, minWidth: 1920, minHeight: 1080 }
 };
 
 export class CameraController {
@@ -22,13 +22,56 @@ export class CameraController {
     this.resolution = String(options.resolution || this.resolution || '1080');
     this.deviceId = options.deviceId ?? this.deviceId;
     const preset = RESOLUTIONS[this.resolution] || RESOLUTIONS[1080];
-    const video = { width: { ideal: preset.width }, height: { ideal: preset.height } };
-    if (this.deviceId) video.deviceId = { exact: this.deviceId };
-    else video.facingMode = { ideal: this.facingMode };
-    this.stream = await navigator.mediaDevices.getUserMedia({ audio: false, video });
+
+    // Önce gerçek HD çözünürlüğü koruyan daha güçlü kısıtları dene.
+    // Cihaz bunu karşılayamazsa ideal kısıtlara otomatik geri dön.
+    const strongVideo = this.buildVideoConstraints(preset, true);
+    const fallbackVideo = this.buildVideoConstraints(preset, false);
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: strongVideo });
+    } catch (error) {
+      if (!['OverconstrainedError', 'ConstraintNotSatisfiedError', 'NotFoundError'].includes(error?.name)) throw error;
+      this.stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: fallbackVideo });
+    }
+
+    const track = this.track;
+    // Stop-motion için hareket akıcılığından çok uzamsal detay önemlidir.
+    try { if (track && 'contentHint' in track) track.contentHint = 'detail'; } catch {}
+
     this.video.srcObject = this.stream;
     await this.video.play();
+    await this.applyPreferredCameraModes();
+    // Kamera açıldıktan hemen sonra ilk kareyi bulanık almamak için kısa yerleşme süresi.
+    await wait(140);
     return this.stream;
+  }
+
+  buildVideoConstraints(preset, strong = false) {
+    const supported = navigator.mediaDevices?.getSupportedConstraints?.() || {};
+    const video = {
+      width: strong ? { min: preset.minWidth, ideal: preset.width } : { ideal: preset.width },
+      height: strong ? { min: preset.minHeight, ideal: preset.height } : { ideal: preset.height },
+      frameRate: { ideal: 30 }
+    };
+    if (supported.resizeMode) video.resizeMode = 'none';
+    if (this.deviceId) video.deviceId = { exact: this.deviceId };
+    else video.facingMode = { ideal: this.facingMode };
+    return video;
+  }
+
+  async applyPreferredCameraModes() {
+    const track = this.track;
+    if (!track?.applyConstraints) return;
+    const caps = this.getCapabilities();
+    const advanced = {};
+    const focusModes = Array.isArray(caps.focusMode) ? caps.focusMode : [];
+    const exposureModes = Array.isArray(caps.exposureMode) ? caps.exposureMode : [];
+    const whiteBalanceModes = Array.isArray(caps.whiteBalanceMode) ? caps.whiteBalanceMode : [];
+    if (focusModes.includes('continuous')) advanced.focusMode = 'continuous';
+    if (exposureModes.includes('continuous')) advanced.exposureMode = 'continuous';
+    if (whiteBalanceModes.includes('continuous')) advanced.whiteBalanceMode = 'continuous';
+    if (!Object.keys(advanced).length) return;
+    try { await track.applyConstraints({ advanced: [advanced] }); } catch {}
   }
 
   async stop() {
@@ -94,13 +137,15 @@ export class CameraController {
     return this.applyAdvanced({ whiteBalanceMode: desired });
   }
 
-  capture(canvas, { mirror = false, aspectRatio = '16:9', quality = 0.92 } = {}) {
+  capture(canvas, { mirror = false, aspectRatio = '16:9', quality = 0.98 } = {}) {
     if (!this.active || !this.video.videoWidth || !this.video.videoHeight) throw new Error('Kamera hazır değil.');
-    return drawSourceToCanvas(this.video, canvas, { mirror, aspectRatio, quality });
+    // Eski çağrılar %92 istese bile yeni kareleri yüksek JPEG kalitesinde sakla.
+    const finalQuality = Math.max(0.97, Math.min(1, Number(quality) || 0.98));
+    return drawSourceToCanvas(this.video, canvas, { mirror, aspectRatio, quality: finalQuality });
   }
 }
 
-export function drawSourceToCanvas(source, canvas, { mirror = false, aspectRatio = '16:9', quality = 0.92 } = {}) {
+export function drawSourceToCanvas(source, canvas, { mirror = false, aspectRatio = '16:9', quality = 0.98 } = {}) {
   const sourceW = source.videoWidth || source.naturalWidth || source.width;
   const sourceH = source.videoHeight || source.naturalHeight || source.height;
   if (!sourceW || !sourceH) throw new Error('Görüntü boyutu okunamadı.');
@@ -118,7 +163,9 @@ export function drawSourceToCanvas(source, canvas, { mirror = false, aspectRatio
   }
   canvas.width = sw;
   canvas.height = sh;
-  const ctx = canvas.getContext('2d', { alpha: false });
+  const ctx = canvas.getContext('2d', { alpha: false, desynchronized: false });
+  ctx.imageSmoothingEnabled = true;
+  if ('imageSmoothingQuality' in ctx) ctx.imageSmoothingQuality = 'high';
   ctx.save();
   if (mirror) {
     ctx.translate(canvas.width, 0);
@@ -126,7 +173,7 @@ export function drawSourceToCanvas(source, canvas, { mirror = false, aspectRatio
   }
   ctx.drawImage(source, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
   ctx.restore();
-  return canvas.toDataURL('image/jpeg', quality);
+  return canvas.toDataURL('image/jpeg', Math.max(0.97, Math.min(1, Number(quality) || 0.98)));
 }
 
 function parseAspect(value) {
@@ -135,3 +182,4 @@ function parseAspect(value) {
   return w > 0 && h > 0 ? w / h : null;
 }
 function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
+function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
