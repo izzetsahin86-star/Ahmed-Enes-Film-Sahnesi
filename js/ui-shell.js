@@ -8,8 +8,9 @@ import './ninja-sfx.js';
 import './sfx-preview.js';
 import './audio-timeline-tweak.js';
 import './audio-workspace.js';
+import './scene-addon.js';
 
-const extraStyles=['./audio-workspace.css','./camera-no-blue.css'];
+const extraStyles=['./audio-workspace.css','./camera-no-blue.css','./scene-studio.css'];
 extraStyles.forEach(href=>{
   if(document.querySelector(`link[href="${href}"]`))return;
   const link=document.createElement('link');
@@ -73,5 +74,5 @@ stage?.addEventListener('dblclick',event=>{if(event.target.closest('button,input
 document.addEventListener('fullscreenchange',()=>{if(fullscreenButton)fullscreenButton.textContent=document.fullscreenElement?'Tam ekrandan çık':'Tam ekran';});
 window.addEventListener('resize',syncDockGeometry);
 const stored=(()=>{try{return localStorage.getItem('aefs-active-dock');}catch{return null;}})();
-activateDock(['shoot','frames','audio','project','export'].includes(stored)?stored:'shoot',{expand:false});
+activateDock(['shoot','frames','audio','scene','project','export'].includes(stored)?stored:'shoot',{expand:false});
 syncDockGeometry();
