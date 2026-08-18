@@ -52,5 +52,5 @@ stage?.addEventListener('dblclick',event=>{if(event.target.closest('button,input
 document.addEventListener('fullscreenchange',()=>{if(fullscreenButton)fullscreenButton.textContent=document.fullscreenElement?'Tam ekrandan çık':'Tam ekran';});
 window.addEventListener('resize',syncDockGeometry);
 const stored=(()=>{try{return localStorage.getItem('aefs-active-dock');}catch{return null;}})();
-activateDock(['shoot','frames','project','export'].includes(stored)?stored:'shoot',{expand:false});
+activateDock(['shoot','frames','audio','project','export'].includes(stored)?stored:'shoot',{expand:false});
 syncDockGeometry();
