@@ -8,13 +8,14 @@ import './ninja-sfx.js';
 import './sfx-preview.js';
 import './audio-timeline-tweak.js';
 import './audio-workspace.js';
+import './audio-visual-timeline.js';
 import './scene-addon.js';
 import './scene-feather-fixed.js';
 import './startup-camera-defaults.js';
 import './playback-duration.js';
 import './frame-preview-tools.js';
 
-const extraStyles=['./audio-workspace.css','./camera-no-blue.css','./scene-studio.css','./playback-duration.css','./frame-preview-tools.css'];
+const extraStyles=['./audio-workspace.css','./audio-visual-timeline.css','./camera-no-blue.css','./scene-studio.css','./playback-duration.css','./frame-preview-tools.css'];
 extraStyles.forEach(href=>{
   if(document.querySelector(`link[href="${href}"]`))return;
   const link=document.createElement('link');
