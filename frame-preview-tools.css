@@ -12,6 +12,9 @@
 body.frame-preview-open{overflow:hidden}
 .delete-all-frames{border-color:rgba(239,68,68,.28)!important;color:#fecaca!important;background:rgba(239,68,68,.08)!important}
 .delete-all-frames span{color:#fca5a5!important}
+.scene-fixed-feather{position:relative!important;padding-bottom:4px!important}
+.scene-fixed-feather input{display:none!important}
+.scene-fixed-feather:after{content:'Sabit 100';display:inline-flex;width:max-content;margin-top:5px;padding:5px 9px;border-radius:999px;background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.24);color:#bbf7d0;font-size:9px;font-weight:800}
 @media(max-width:600px){
   .frame-photo-preview{padding-left:8px;padding-right:8px}
   .frame-photo-preview-body{grid-template-columns:42px minmax(0,1fr) 42px;gap:4px}
