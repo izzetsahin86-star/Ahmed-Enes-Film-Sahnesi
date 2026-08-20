@@ -2,6 +2,7 @@ import './quality-guard.js';
 import './camera-standard-ui.js';
 import './camera-simple.js';
 import './camera-logo.js';
+import './camera-zoom-rail.js';
 import './camera-tweaks.js';
 import './studio-ux.js';
 import './modern-sheet.js';
@@ -17,7 +18,7 @@ import './playback-duration.js';
 import './frame-preview-tools.js';
 import './video-import.js';
 
-const extraStyles=['./audio-workspace.css','./audio-visual-timeline.css','./camera-no-blue.css','./camera-logo.css','./scene-studio.css','./playback-duration.css','./frame-preview-tools.css','./video-import.css'];
+const extraStyles=['./audio-workspace.css','./audio-visual-timeline.css','./camera-no-blue.css','./camera-logo.css','./camera-zoom-rail.css','./scene-studio.css','./playback-duration.css','./frame-preview-tools.css','./video-import.css'];
 extraStyles.forEach(href=>{
   if(document.querySelector(`link[href="${href}"]`))return;
   const link=document.createElement('link');
