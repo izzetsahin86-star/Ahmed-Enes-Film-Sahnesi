@@ -14,8 +14,9 @@ import './scene-feather-fixed.js';
 import './startup-camera-defaults.js';
 import './playback-duration.js';
 import './frame-preview-tools.js';
+import './video-import.js';
 
-const extraStyles=['./audio-workspace.css','./audio-visual-timeline.css','./camera-no-blue.css','./scene-studio.css','./playback-duration.css','./frame-preview-tools.css'];
+const extraStyles=['./audio-workspace.css','./audio-visual-timeline.css','./camera-no-blue.css','./scene-studio.css','./playback-duration.css','./frame-preview-tools.css','./video-import.css'];
 extraStyles.forEach(href=>{
   if(document.querySelector(`link[href="${href}"]`))return;
   const link=document.createElement('link');
