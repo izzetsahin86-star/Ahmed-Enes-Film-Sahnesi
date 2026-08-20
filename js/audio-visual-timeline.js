@@ -127,7 +127,8 @@ function renderMarkers() {
       badge.className = 'audio-location-number';
       row.querySelector('.audio-clip-main')?.prepend(badge);
     }
-    badge.textContent = String(index + 1);
+    const numberText = String(index + 1);
+    if (badge && badge.textContent !== numberText) badge.textContent = numberText;
 
     const startInput = row.querySelector('[data-role="start"]');
     if (startInput && !startInput.dataset.visualBound) {
@@ -166,8 +167,10 @@ if (pane && layout && clipList) {
     initialized = true;
   }, 350);
 
+  // Sadece klip listesinin doğrudan çocukları eklendiğinde/silindiğinde izle.
+  // Klip içindeki numara etiketi gibi kendi DOM güncellemelerimizi izlemek sonsuz döngüye neden olur.
   const clipObserver = new MutationObserver(handleClipMutation);
-  clipObserver.observe(clipList, { childList: true, subtree: true });
+  clipObserver.observe(clipList, { childList: true });
 
   const positionObserver = new MutationObserver(syncPlayhead);
   if (playbackPosition) positionObserver.observe(playbackPosition, { childList: true, subtree: true, characterData: true });
@@ -175,7 +178,6 @@ if (pane && layout && clipList) {
 
   pane.addEventListener('click', event => {
     if (event.target.closest('.ninja-sfx-pad,.sfx-pad,[data-sfx]')) {
-      // Efekt eklenmeden hemen önce kullanıcıya mevcut konumu göster.
       ensureInsertHint();
       const target = document.getElementById('audioInsertPosition');
       if (target) target.textContent = format(currentSeconds());
