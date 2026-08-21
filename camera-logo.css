@@ -1,26 +1,3 @@
-/* Sol üst kamera kapatma X'i yerine Ahmed Enes logosu */
-.simple-close{display:none!important}
-.simple-corner-logo{
-  width:54px;
-  height:54px;
-  flex:0 0 54px;
-  border-radius:999px;
-  overflow:hidden;
-  border:0;
-  background:#fff;
-  box-shadow:0 8px 24px rgba(0,0,0,.34),0 0 0 1px rgba(255,255,255,.12);
-  pointer-events:none;
-}
-.simple-corner-logo img{
-  display:block;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  object-position:center;
-  border-radius:999px;
-  background:#fff;
-  transform:none!important;
-}
-@media(max-width:520px){
-  .simple-corner-logo{width:48px;height:48px;flex-basis:48px}
-}
+/* Sol üst alan tamamen kaldırıldı: logo ve X yok, Oynat sağ üstte kalır. */
+.simple-corner-logo,.simple-close{display:none!important}
+.simple-top-controls{justify-content:flex-end!important}
