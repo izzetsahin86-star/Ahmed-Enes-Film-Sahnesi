@@ -64,6 +64,16 @@ function installOverlayFeedback(){
   },{passive:true});
 }
 
+function installFullscreenDockExit(){
+  if(document.documentElement.dataset.smartFullscreenDockExit)return;
+  document.documentElement.dataset.smartFullscreenDockExit='1';
+  document.addEventListener('click',event=>{
+    if(!document.fullscreenElement)return;
+    if(!event.target?.closest?.('.simple-gallery-button,.simple-panel-button'))return;
+    document.exitFullscreen?.().catch(()=>{});
+  },true);
+}
+
 function markReady(){
   document.body.classList.add('smart-ui-ready');
   syncFrameActionIcons();syncExportOptions();syncViewport();
@@ -75,6 +85,7 @@ const exportPane=$('.export-pane');
 if(exportPane)new MutationObserver(()=>requestAnimationFrame(syncExportOptions)).observe(exportPane,{childList:true});
 
 installOverlayFeedback();
+installFullscreenDockExit();
 markReady();
 window.addEventListener('resize',syncViewport,{passive:true});
 window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
