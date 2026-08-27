@@ -12,6 +12,7 @@ import './audio-timeline-tweak.js';
 import './audio-workspace.js';
 import './audio-visual-timeline.js';
 import './scene-addon.js';
+import './scene-capture-picker.js';
 import './scene-feather-fixed.js';
 import './startup-camera-defaults.js';
 import './playback-duration.js';
