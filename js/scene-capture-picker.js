@@ -35,6 +35,11 @@ function appendFrame(result){
   const frames=globalThis.AEFS_PROJECT_FRAMES;
   const timeline=globalThis.AEFS_TIMELINE;
   if(!Array.isArray(frames)||!timeline?.setFrames)throw new Error('Proje zaman çizelgesi hazır değil.');
+
+  // Normal addFrame() gibi çekim öncesi proje durumunu Geri Al geçmişine koy.
+  // aspectSelect'in change işleyicisi mevcut değeri değiştirmeden pushHistory() çalıştırır.
+  $('#aspectSelect')?.dispatchEvent(new Event('change',{bubbles:true}));
+
   const frame={
     id:globalThis.crypto?.randomUUID?.()||`frame-${Date.now()}`,
     dataUrl:result.dataUrl,
