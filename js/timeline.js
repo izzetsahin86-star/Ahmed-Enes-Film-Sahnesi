@@ -6,12 +6,18 @@ export class Timeline {
     this.selectedIndex = -1;
     this.dragIndex = null;
     this.zoom = 45;
+    globalThis.AEFS_TIMELINE = this;
+    globalThis.AEFS_PROJECT_FRAMES = this.frames;
     this.setZoom(this.zoom);
   }
 
   setFrames(frames, selectedIndex) {
     this.frames = frames;
     this.selectedIndex = selectedIndex;
+    // Kamera eklentilerinin mevcut proje karelerine güvenli biçimde erişebilmesi için
+    // sadece referansı paylaş. Proje sahibi ve normal Timeline davranışı değişmez.
+    globalThis.AEFS_TIMELINE = this;
+    globalThis.AEFS_PROJECT_FRAMES = frames;
     this.render();
   }
 
