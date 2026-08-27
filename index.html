@@ -225,7 +225,8 @@
   <input id="musicFileInput" type="file" accept="audio/*" hidden />
   <input id="soundFileInput" type="file" accept="audio/*" hidden />
   <canvas id="captureCanvas" hidden></canvas><canvas id="exportCanvas" hidden></canvas><canvas id="workCanvas" hidden></canvas>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <!-- Uyumluluk için DOM'da tutulur; uygulama içi bildirim/toast pencereleri tamamen kapalıdır. -->
+  <div id="toast" hidden aria-hidden="true" style="display:none!important"></div>
   <script type="module" src="./js/app.js"></script><script type="module" src="./js/ui-shell.js"></script><script type="module" src="./js/audio-addon.js"></script>
 </body>
 </html>
