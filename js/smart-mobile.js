@@ -28,12 +28,6 @@ function installNavIcons(){
   });
 }
 
-function cleanupLegacyUi(){
-  document.querySelectorAll('.modern-sheet-scrim,.simple-corner-logo,.simple-close').forEach(element=>element.remove());
-  const obsolete=['camera-no-blue.css','camera-logo.css','camera-zoom-rail.css','camera-tweaks.css','studio-ux.css','modern-sheet.css'];
-  document.querySelectorAll('link[rel="stylesheet"]').forEach(link=>{if(obsolete.some(name=>link.href.includes(name)))link.remove()});
-}
-
 function sync(){
   const open=isOpen();
   document.body.classList.toggle('smart-sheet-open',open);
@@ -102,7 +96,7 @@ function installSheetGesture(){
 
 function installMicroFeedback(){
   document.addEventListener('pointerdown',event=>{
-    const target=event.target?.closest?.('.simple-tool-button,.simple-square-button,.simple-gallery-button,.simple-panel-button,.dock-tab,.dock-collapse,.panel-btn,.lock-action,.mini-action,.project-action,.export-launch,.shortcut-launch,.scene-bg-thumb,.scene-capture-choice,.smart-panel-segment button,.smart-export-option,.audio-action,.ninja-sfx-pad,.sfx-pad,.history-actions .icon-btn');
+    const target=event.target?.closest?.('.simple-tool-button,.simple-square-button,.simple-gallery-button,.simple-panel-button,.dock-tab,.dock-collapse,.panel-btn,.lock-action,.mini-action,.project-action,.scene-bg-thumb,.scene-capture-choice,.smart-panel-segment button,.smart-export-option,.audio-action,.ninja-sfx-pad,.sfx-pad,.history-actions .icon-btn');
     if(!target||target.disabled)return;
     target.classList.add('smart-pressing');
   },{passive:true});
@@ -111,7 +105,6 @@ function installMicroFeedback(){
   document.addEventListener('pointercancel',clear,{passive:true});
 }
 
-cleanupLegacyUi();
 installNavIcons();
 ensureScrim();
 installActiveTabToggle();
@@ -125,4 +118,4 @@ if(timelineTrack)new MutationObserver(()=>requestAnimationFrame(syncGalleryThumb
 const navObserver=new MutationObserver(()=>{installNavIcons();installActiveTabToggle();sync()});
 const nav=$('.dock-tabs');if(nav)navObserver.observe(nav,{childList:true,subtree:true});
 collapse?.addEventListener('click',()=>requestAnimationFrame(sync));
-window.addEventListener('pageshow',()=>{cleanupLegacyUi();installNavIcons();sync();syncGalleryThumb()});
+window.addEventListener('pageshow',()=>{installNavIcons();sync();syncGalleryThumb()});
