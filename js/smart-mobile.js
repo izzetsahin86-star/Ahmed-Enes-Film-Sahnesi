@@ -22,8 +22,16 @@ function installNavIcons(){
   tabs().forEach(tab=>{
     const icon=tab.querySelector('span');
     const name=tab.dataset.dockTab;
-    if(icon&&NAV_ICONS[name])icon.innerHTML=NAV_ICONS[name];
+    if(!icon||!NAV_ICONS[name]||icon.dataset.smartIcon===name)return;
+    icon.innerHTML=NAV_ICONS[name];
+    icon.dataset.smartIcon=name;
   });
+}
+
+function cleanupLegacyUi(){
+  document.querySelectorAll('.modern-sheet-scrim,.simple-corner-logo,.simple-close').forEach(element=>element.remove());
+  const obsolete=['camera-no-blue.css','camera-logo.css','camera-zoom-rail.css','camera-tweaks.css','studio-ux.css','modern-sheet.css'];
+  document.querySelectorAll('link[rel="stylesheet"]').forEach(link=>{if(obsolete.some(name=>link.href.includes(name)))link.remove()});
 }
 
 function sync(){
@@ -103,6 +111,7 @@ function installMicroFeedback(){
   document.addEventListener('pointercancel',clear,{passive:true});
 }
 
+cleanupLegacyUi();
 installNavIcons();
 ensureScrim();
 installActiveTabToggle();
@@ -116,4 +125,4 @@ if(timelineTrack)new MutationObserver(()=>requestAnimationFrame(syncGalleryThumb
 const navObserver=new MutationObserver(()=>{installNavIcons();installActiveTabToggle();sync()});
 const nav=$('.dock-tabs');if(nav)navObserver.observe(nav,{childList:true,subtree:true});
 collapse?.addEventListener('click',()=>requestAnimationFrame(sync));
-window.addEventListener('pageshow',()=>{installNavIcons();sync();syncGalleryThumb()});
+window.addEventListener('pageshow',()=>{cleanupLegacyUi();installNavIcons();sync();syncGalleryThumb()});
