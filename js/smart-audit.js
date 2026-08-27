@@ -37,7 +37,8 @@ function syncExportOptions(){
       option.style.borderColor=working?'rgba(109,181,255,.62)':'';
       option.style.boxShadow=working?'0 0 0 1px rgba(47,140,255,.18),0 0 22px rgba(47,140,255,.18)':'';
       option.style.pointerEvents=working?'none':'';
-      if(title)title.textContent=working?targetTitle:(option.dataset.defaultLabel||title.textContent);
+      const nextTitle=working?targetTitle:(option.dataset.defaultLabel||title?.textContent||'');
+      if(title&&title.textContent!==nextTitle)title.textContent=nextTitle;
       option.setAttribute('aria-busy',String(working));
     };
     sync();
@@ -51,6 +52,7 @@ function syncExportOptions(){
 function syncViewport(){
   const height=window.visualViewport?.height||window.innerHeight;
   if(height>0)document.documentElement.style.setProperty('--smart-viewport-h',`${Math.round(height)}px`);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content','#05080e');
 }
 
 function installOverlayFeedback(){
@@ -68,9 +70,9 @@ function markReady(){
 }
 
 const frameActions=$('.frame-action-buttons');
-if(frameActions)new MutationObserver(()=>requestAnimationFrame(syncFrameActionIcons)).observe(frameActions,{childList:true,subtree:true});
+if(frameActions)new MutationObserver(()=>requestAnimationFrame(syncFrameActionIcons)).observe(frameActions,{childList:true});
 const exportPane=$('.export-pane');
-if(exportPane)new MutationObserver(()=>requestAnimationFrame(syncExportOptions)).observe(exportPane,{childList:true,subtree:true});
+if(exportPane)new MutationObserver(()=>requestAnimationFrame(syncExportOptions)).observe(exportPane,{childList:true});
 
 installOverlayFeedback();
 markReady();
