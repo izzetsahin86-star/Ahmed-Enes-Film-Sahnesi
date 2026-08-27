@@ -18,7 +18,7 @@ import './smart-mobile.js';
 import './smart-panels.js';
 import './smart-audit.js';
 
-const extraStyles=['./audio-workspace.css','./audio-visual-timeline.css','./scene-studio.css','./playback-duration.css','./frame-preview-tools.css','./video-import.css','./smart-panels.css','./smart-overlays.css','./smart-final.css'];
+const extraStyles=['./audio-workspace.css','./audio-visual-timeline.css','./scene-studio.css','./playback-duration.css','./frame-preview-tools.css','./video-import.css','./smart-panels.css','./smart-overlays.css','./smart-final.css','./frames-actions-fix.css'];
 extraStyles.forEach(href=>{
   if(document.querySelector(`link[href="${href}"]`))return;
   const link=document.createElement('link');
