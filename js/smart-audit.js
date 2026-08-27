@@ -1,4 +1,4 @@
-// Akıllı Mobil son kontrol: dinamik kontrolleri ve çıktı durumlarını senkron tutar.
+// Akıllı Mobil son kontrol: dinamik kontrolleri, çıktı durumlarını ve temiz runtime DOM'unu yönetir.
 const $=(selector,root=document)=>root.querySelector(selector);
 const $$=(selector,root=document)=>[...root.querySelectorAll(selector)];
 
@@ -55,17 +55,42 @@ function syncViewport(){
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content','#05080e');
 }
 
-function suppressStartupRestoreToast(){
-  const toast=$('#toast');
-  if(!toast)return;
-  const hiddenMessage='Son proje otomatik olarak geri yüklendi.';
-  const suppress=()=>{
-    if((toast.textContent||'').trim()!==hiddenMessage)return;
-    toast.classList.remove('show');
-    toast.textContent='';
-  };
-  suppress();
-  new MutationObserver(suppress).observe(toast,{childList:true,subtree:true,characterData:true});
+function ensureRuntimeControls(){
+  let runtime=$('#aefsRuntimeControls');
+  if(runtime)return runtime;
+  runtime=document.createElement('div');
+  runtime.id='aefsRuntimeControls';
+  runtime.hidden=true;
+  runtime.setAttribute('aria-hidden','true');
+  runtime.style.display='none';
+  document.body.append(runtime);
+  return runtime;
+}
+
+function cleanupLegacyRuntime(){
+  const runtime=ensureRuntimeControls();
+  const keepAsEngineControls=[
+    'projectName','saveChip','shortcutsBtn',
+    'statusDot','cameraStatus','cameraMeta','cameraDeviceSelect','switchCameraBtn','fullscreenBtn',
+    'cameraToggleBtn','captureBtn','timerBtn',
+    'exportMp4Btn','exportGifBtn','exportWebmBtn','exportProjectBtn','exportFrameBtn'
+  ];
+  keepAsEngineControls.forEach(id=>{
+    const element=document.getElementById(id);
+    if(element&&element.parentElement!==runtime)runtime.append(element);
+  });
+
+  // Eski görsel kabuklar artık Akıllı Mobil arayüzde kullanılmıyor.
+  $('.studio-topbar')?.remove();
+  $('.floating-toolbar')?.remove();
+  $('.floating-capture-bar')?.remove();
+  $('.export-dock-layout')?.remove();
+  $('#exportDialog')?.remove();
+
+  // Eski uyumluluk ve bildirim elemanları tamamen DOM'dan çıkarılır.
+  $('.compat-actions')?.remove();
+  $('#closeSettingsBtn')?.remove();
+  $('#toast')?.remove();
 }
 
 function installOverlayFeedback(){
@@ -97,10 +122,10 @@ if(frameActions)new MutationObserver(()=>requestAnimationFrame(syncFrameActionIc
 const exportPane=$('.export-pane');
 if(exportPane)new MutationObserver(()=>requestAnimationFrame(syncExportOptions)).observe(exportPane,{childList:true});
 
-suppressStartupRestoreToast();
 installOverlayFeedback();
 installFullscreenDockExit();
 markReady();
+cleanupLegacyRuntime();
 window.addEventListener('resize',syncViewport,{passive:true});
 window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
-window.addEventListener('pageshow',markReady);
+window.addEventListener('pageshow',()=>{markReady();cleanupLegacyRuntime()});
