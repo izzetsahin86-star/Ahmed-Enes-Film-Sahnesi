@@ -14,8 +14,6 @@ export class Timeline {
   setFrames(frames, selectedIndex) {
     this.frames = frames;
     this.selectedIndex = selectedIndex;
-    // Kamera eklentilerinin mevcut proje karelerine güvenli biçimde erişebilmesi için
-    // sadece referansı paylaş. Proje sahibi ve normal Timeline davranışı değişmez.
     globalThis.AEFS_TIMELINE = this;
     globalThis.AEFS_PROJECT_FRAMES = frames;
     this.render();
@@ -48,7 +46,9 @@ export class Timeline {
       button.className = `frame-card${index === this.selectedIndex ? ' selected' : ''}`;
       button.draggable = true;
       button.dataset.index = String(index);
-      button.setAttribute('aria-label', `Kare ${index + 1}`);
+      button.dataset.sceneBackgroundNumber = String(Number(frame.sceneBackgroundNumber) || 0);
+      const backgroundNumber = Number(frame.sceneBackgroundNumber) || 0;
+      button.setAttribute('aria-label', backgroundNumber > 0 ? `Kare ${index + 1}, Arka Plan ${backgroundNumber}` : `Kare ${index + 1}`);
 
       const img = document.createElement('img');
       img.src = frame.dataUrl;
@@ -59,6 +59,14 @@ export class Timeline {
       badge.className = 'frame-index';
       badge.textContent = String(index + 1).padStart(3, '0');
       button.append(img, badge);
+
+      if (backgroundNumber > 0) {
+        const sceneBadge = document.createElement('span');
+        sceneBadge.className = 'frame-scene-badge';
+        sceneBadge.textContent = `BG${backgroundNumber}`;
+        sceneBadge.title = frame.sceneBackgroundName || `Arka Plan ${backgroundNumber}`;
+        button.append(sceneBadge);
+      }
 
       const hold = Math.max(1, Number(frame.hold) || 1);
       if (hold > 1) {
