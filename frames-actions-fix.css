@@ -1,0 +1,75 @@
+/* Kareler paneli — temel kare işlemleri Film/Renk modundan bağımsız olarak daima görünür. */
+.frames-pane .frames-layout{
+  grid-template-columns:minmax(0,1fr)!important;
+  grid-auto-columns:minmax(0,1fr)!important;
+}
+.frames-pane[data-smart-frames-view="film"] .frames-layout,
+.frames-pane[data-smart-frames-view="color"] .frames-layout{
+  grid-template-rows:auto minmax(0,1fr)!important;
+}
+
+/* Önceki Akıllı Mobil kuralı Renk modunda işlem çubuğunu saklıyordu. */
+.frames-pane[data-smart-frames-view="color"] .frame-actions-rail{
+  display:grid!important;
+}
+.frames-pane[data-smart-frames-view="film"] .timeline-zone{display:block!important}
+.frames-pane[data-smart-frames-view="film"] .color-editor{display:none!important}
+.frames-pane[data-smart-frames-view="color"] .timeline-zone{display:none!important}
+.frames-pane[data-smart-frames-view="color"] .color-editor{display:grid!important}
+
+/* İşlem alanı: oynatma solda, kare araçları sağda, Freeze/Oynatma altta. */
+.frames-pane .frame-actions-rail{
+  width:100%!important;
+  min-width:0!important;
+  display:grid!important;
+  grid-template-columns:104px minmax(0,1fr)!important;
+  grid-template-rows:auto auto!important;
+  grid-template-areas:"play actions" "play selects"!important;
+  gap:6px!important;
+  overflow:hidden!important;
+  padding:0!important;
+}
+.frames-pane .playback-controls{grid-area:play!important;min-width:0!important}
+.frames-pane .frame-action-buttons{
+  grid-area:actions!important;
+  min-width:0!important;
+  width:100%!important;
+  display:flex!important;
+  gap:6px!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  padding-bottom:2px!important;
+  scrollbar-width:none!important;
+  -webkit-overflow-scrolling:touch;
+}
+.frames-pane .frame-action-buttons::-webkit-scrollbar{display:none!important}
+.frames-pane .edit-selects{
+  grid-area:selects!important;
+  min-width:0!important;
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:6px!important;
+  padding:0!important;
+}
+.frames-pane .edit-selects label{min-width:0!important}
+.frames-pane .edit-selects select{width:100%!important}
+
+/* Fotoğraf / Video / Çoğalt / Sil / Tümünü Sil / Sola / Sağa tek dokunuşluk kartlar. */
+.frames-pane .frame-action-buttons .panel-btn{
+  flex:0 0 66px!important;
+  width:66px!important;
+  min-width:66px!important;
+  min-height:58px!important;
+}
+.frames-pane #deleteFrameBtn,
+.frames-pane #deleteAllFramesBtn{
+  display:flex!important;
+}
+
+@media(max-width:430px){
+  .frames-pane .frame-actions-rail{grid-template-columns:92px minmax(0,1fr)!important;gap:5px!important}
+  .frames-pane .playback-controls{min-height:54px!important;padding:5px!important}
+  .frames-pane .frame-action-buttons .panel-btn{flex-basis:62px!important;width:62px!important;min-width:62px!important;min-height:54px!important}
+  .frames-pane .edit-selects select{min-height:34px!important;font-size:8.5px!important}
+}
