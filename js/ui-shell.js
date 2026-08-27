@@ -4,7 +4,6 @@ import './camera-simple.js';
 import './camera-zoom-rail.js';
 import './ninja-sfx.js';
 import './sfx-preview.js';
-import './audio-timeline-tweak.js';
 import './audio-workspace.js';
 import './audio-visual-timeline.js';
 import './scene-addon.js';
@@ -18,7 +17,7 @@ import './smart-mobile.js';
 import './smart-panels.js';
 import './smart-audit.js';
 
-const extraStyles=['./audio-workspace.css','./audio-visual-timeline.css','./scene-studio.css','./playback-duration.css','./frame-preview-tools.css','./video-import.css','./smart-panels.css','./smart-overlays.css','./smart-final.css','./frames-actions-fix.css'];
+const extraStyles=['./audio-timeline-tweak.css','./audio-workspace.css','./audio-visual-timeline.css','./scene-studio.css','./playback-duration.css','./frame-preview-tools.css','./video-import.css','./smart-panels.css','./smart-overlays.css','./smart-final.css','./frames-actions-fix.css'];
 extraStyles.forEach(href=>{
   if(document.querySelector(`link[href="${href}"]`))return;
   const link=document.createElement('link');
@@ -31,8 +30,6 @@ const dock=document.getElementById('timelineDock');
 const collapseButton=document.getElementById('collapseTimelineBtn');
 const tabs=[...document.querySelectorAll('[data-dock-tab]')];
 const panels=[...document.querySelectorAll('[data-dock-panel]')];
-const settingsButton=document.getElementById('settingsBtn');
-const shortcutMirror=document.querySelector('[data-open-shortcuts]');
 const shortcutsButton=document.getElementById('shortcutsBtn');
 const fullscreenButton=document.getElementById('fullscreenBtn');
 const stage=document.getElementById('stage');
@@ -67,8 +64,6 @@ function activateDock(name,{expand=true}={}){
   if(expand)expandDock();
 }
 tabs.forEach(tab=>tab.addEventListener('click',()=>activateDock(tab.dataset.dockTab)));
-settingsButton?.addEventListener('click',()=>activateDock('shoot'));
-shortcutMirror?.addEventListener('click',()=>shortcutsButton?.click());
 collapseButton?.addEventListener('click',()=>queueMicrotask(syncDockGeometry));
 
 fullscreenButton?.addEventListener('click',async event=>{
@@ -84,3 +79,6 @@ window.addEventListener('resize',syncDockGeometry);
 const stored=(()=>{try{return localStorage.getItem('aefs-active-dock')}catch{return null}})();
 activateDock(['shoot','frames','audio','scene','project','export'].includes(stored)?stored:'shoot',{expand:false});
 syncDockGeometry();
+
+// Kısayollar düğmesi runtime katmanında tutulur; Akıllı Dışa Aktar paneli bunu tetikler.
+if(shortcutsButton)shortcutsButton.setAttribute('aria-hidden','true');
