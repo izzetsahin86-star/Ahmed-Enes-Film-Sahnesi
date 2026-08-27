@@ -1,13 +1,16 @@
 {
+  "id": "./",
   "name": "Ahmed Enes Film Sahnesi",
   "short_name": "Film Sahnesi",
-  "description": "Profesyonel tarayıcı tabanlı stop-motion film stüdyosu",
+  "description": "Mobil odaklı stop-motion film çekim ve düzenleme stüdyosu",
+  "lang": "tr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#080a0f",
-  "theme_color": "#080a0f",
+  "background_color": "#05080e",
+  "theme_color": "#05080e",
   "orientation": "any",
+  "categories": ["photo", "video", "entertainment"],
   "icons": [
     { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
