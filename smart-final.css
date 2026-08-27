@@ -17,6 +17,28 @@ body[data-studio-panel="audio"] .studio-dock:not(.collapsed){height:min(72dvh,65
 .smart-export-option.working{background:rgba(47,140,255,.14)!important;border-color:rgba(109,181,255,.62)!important}
 .smart-export-option.working .smart-export-icon{background:rgba(47,140,255,.18)!important}
 
+/* Ortak bildirim: büyük kutu yerine pil boyutunda kompakt toast. */
+.toast{
+  width:max-content!important;
+  min-width:0!important;
+  max-width:calc(100vw - 28px)!important;
+  min-height:30px!important;
+  height:auto!important;
+  padding:6px 11px!important;
+  border-radius:999px!important;
+  font-size:9px!important;
+  font-weight:760!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  background:rgba(7,14,25,.88)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  box-shadow:0 8px 22px rgba(0,0,0,.28)!important;
+  backdrop-filter:blur(16px)!important;
+  -webkit-backdrop-filter:blur(16px)!important;
+}
+
 /* iPhone yatay ve kısa ekranlarda panel içerikleri taşmasın. */
 @media(orientation:landscape) and (max-height:560px){
   body[data-studio-panel="audio"] .studio-dock:not(.collapsed){height:min(84dvh,410px)!important}
@@ -27,6 +49,7 @@ body[data-studio-panel="audio"] .studio-dock:not(.collapsed){height:min(72dvh,65
   body[data-studio-panel="audio"] .studio-dock:not(.collapsed){height:min(74dvh,620px)!important}
   .studio-dock:not(.collapsed) .dock-body{min-height:0!important}
   .dock-pane{padding-bottom:max(10px,env(safe-area-inset-bottom))!important}
+  .toast{max-width:calc(100vw - 22px)!important;min-height:29px!important;padding:6px 10px!important;font-size:8.7px!important}
 }
 
 @media(prefers-reduced-motion:reduce){.smart-export-option.working{animation:none!important}}
