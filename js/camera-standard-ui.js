@@ -7,11 +7,3 @@ if(resolutionSelect){
   const label=resolutionSelect.closest('.dock-control')?.querySelector('span');
   if(label)label.textContent='Kamera Kalitesi';
 }
-
-const cameraMeta=document.getElementById('cameraMeta');
-const observer=new MutationObserver(()=>{
-  if(!cameraMeta)return;
-  const text=cameraMeta.textContent||'';
-  if(text.includes('×')&&!text.includes('telefon standardı'))cameraMeta.textContent=`${text} · telefon standardı`;
-});
-if(cameraMeta)observer.observe(cameraMeta,{childList:true,subtree:true,characterData:true});
