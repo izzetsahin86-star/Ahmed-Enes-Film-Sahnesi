@@ -30,10 +30,13 @@ function syncExportOptions(){
     const title=option.querySelector('b');
     if(title&&!option.dataset.defaultLabel)option.dataset.defaultLabel=title.textContent||'';
     const sync=()=>{
-      option.disabled=Boolean(target.disabled);
       const targetTitle=target.querySelector('strong')?.textContent?.trim()||'';
       const working=/hazırlanıyor|aktarılıyor|oluşturuluyor|%/i.test(targetTitle);
+      option.disabled=Boolean(target.disabled)&&!working;
       option.classList.toggle('working',working);
+      option.style.borderColor=working?'rgba(109,181,255,.62)':'';
+      option.style.boxShadow=working?'0 0 0 1px rgba(47,140,255,.18),0 0 22px rgba(47,140,255,.18)':'';
+      option.style.pointerEvents=working?'none':'';
       if(title)title.textContent=working?targetTitle:(option.dataset.defaultLabel||title.textContent);
       option.setAttribute('aria-busy',String(working));
     };
