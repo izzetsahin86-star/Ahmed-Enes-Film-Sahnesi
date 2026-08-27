@@ -1,3 +1,20 @@
+/* İlk çizim koruması — Akıllı Mobil hazır olmadan eski kabuk görünmez. */
+body:not(.smart-ui-ready){background:#000!important}
+body:not(.smart-ui-ready) .studio-topbar,
+body:not(.smart-ui-ready) .floating-toolbar,
+body:not(.smart-ui-ready) .floating-capture-bar,
+body:not(.smart-ui-ready) .export-dock-layout,
+body:not(.smart-ui-ready) #exportDialog,
+body:not(.smart-ui-ready) .compat-actions,
+body:not(.smart-ui-ready) #closeSettingsBtn,
+body:not(.smart-ui-ready) #toast{display:none!important}
+body:not(.smart-ui-ready) .studio-dock{visibility:hidden!important}
+body:not(.smart-ui-ready) .studio-shell{grid-template-rows:minmax(0,1fr) 68px!important;background:#000!important}
+body:not(.smart-ui-ready) .camera-workspace,
+body:not(.smart-ui-ready) .camera-stage-column,
+body:not(.smart-ui-ready) .fullscreen-stage-wrap,
+body:not(.smart-ui-ready) .fullscreen-stage{background:#000!important}
+
 /* Life Lapse-inspired production controls — Ahmed Enes Film Sahnesi */
 .color-tint { position:absolute; inset:0; z-index:3; pointer-events:none; mix-blend-mode:soft-light; opacity:0; }
 .enhanced-strip { gap:10px; }
