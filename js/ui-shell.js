@@ -15,8 +15,9 @@ import './playback-duration.js';
 import './frame-preview-tools.js';
 import './video-import.js';
 import './smart-mobile.js';
+import './smart-panels.js';
 
-const extraStyles=['./audio-workspace.css','./audio-visual-timeline.css','./scene-studio.css','./playback-duration.css','./frame-preview-tools.css','./video-import.css'];
+const extraStyles=['./audio-workspace.css','./audio-visual-timeline.css','./scene-studio.css','./playback-duration.css','./frame-preview-tools.css','./video-import.css','./smart-panels.css'];
 extraStyles.forEach(href=>{
   if(document.querySelector(`link[href="${href}"]`))return;
   const link=document.createElement('link');
@@ -61,7 +62,7 @@ function activateDock(name,{expand=true}={}){
   tabs.forEach(tab=>{const active=tab.dataset.dockTab===name;tab.classList.toggle('active',active);tab.setAttribute('aria-selected',String(active));});
   panels.forEach(panel=>panel.classList.toggle('active',panel.dataset.dockPanel===name));
   document.body.dataset.studioPanel=name;
-  try{localStorage.setItem('aefs-active-dock',name);}catch{}
+  try{localStorage.setItem('aefs-active-dock',name)}catch{}
   if(expand)expandDock();
 }
 tabs.forEach(tab=>tab.addEventListener('click',()=>activateDock(tab.dataset.dockTab)));
@@ -76,9 +77,9 @@ fullscreenButton?.addEventListener('click',async event=>{
     else await stageColumn?.requestFullscreen?.();
   }catch{}
 },{capture:true});
-stage?.addEventListener('dblclick',event=>{if(event.target.closest('button,input,select'))return;fullscreenButton?.click();});
-document.addEventListener('fullscreenchange',()=>{if(fullscreenButton)fullscreenButton.textContent=document.fullscreenElement?'Tam ekrandan çık':'Tam ekran';});
+stage?.addEventListener('dblclick',event=>{if(event.target.closest('button,input,select'))return;fullscreenButton?.click()});
+document.addEventListener('fullscreenchange',()=>{if(fullscreenButton)fullscreenButton.textContent=document.fullscreenElement?'Tam ekrandan çık':'Tam ekran'});
 window.addEventListener('resize',syncDockGeometry);
-const stored=(()=>{try{return localStorage.getItem('aefs-active-dock');}catch{return null;}})();
+const stored=(()=>{try{return localStorage.getItem('aefs-active-dock')}catch{return null}})();
 activateDock(['shoot','frames','audio','scene','project','export'].includes(stored)?stored:'shoot',{expand:false});
 syncDockGeometry();
