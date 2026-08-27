@@ -30,7 +30,8 @@
 .smart-panel-segment .sm-icon{width:17px;height:17px;display:inline-block;vertical-align:-4px;margin-right:5px}
 
 /* ---------- ÇEKİM ---------- */
-#sidePanel[data-smart-shoot-view]{overflow:hidden!important;display:flex!important;flex-direction:column!important}
+#sidePanel[data-smart-shoot-view]:not(.active){display:none!important}
+#sidePanel.active[data-smart-shoot-view]{overflow:hidden!important;display:flex!important;flex-direction:column!important}
 #sidePanel .smart-shoot-nav{flex:0 0 auto}
 #sidePanel .control-strip{
   flex:1 1 auto!important;height:auto!important;min-height:0!important;
@@ -43,6 +44,7 @@
 #sidePanel[data-smart-shoot-view="basic"] .control-strip>[data-smart-shoot-group="basic"],
 #sidePanel[data-smart-shoot-view="camera"] .control-strip>[data-smart-shoot-group="camera"],
 #sidePanel[data-smart-shoot-view="assist"] .control-strip>[data-smart-shoot-group="assist"]{display:flex!important}
+#sidePanel.active[data-smart-shoot-view="camera"] .control-strip>.lock-control-group[data-smart-shoot-group="camera"]{display:grid!important}
 #sidePanel .dock-control,#sidePanel .dock-toggle,#sidePanel .lock-control-group{
   width:auto!important;min-width:0!important;min-height:92px!important;height:auto!important;
   padding:11px!important;border:1px solid var(--sp-line)!important;border-radius:15px!important;
@@ -69,7 +71,8 @@
 #sidePanel .dock-toggle b{font-size:11px!important;color:#fff!important}#sidePanel .dock-toggle small{font-size:8.5px!important;color:var(--sp-muted)!important}
 
 /* ---------- KARELER ---------- */
-.frames-pane[data-smart-frames-view]{overflow:hidden!important;display:flex!important;flex-direction:column!important}
+.frames-pane[data-smart-frames-view]:not(.active){display:none!important}
+.frames-pane.active[data-smart-frames-view]{overflow:hidden!important;display:flex!important;flex-direction:column!important}
 .frames-pane .smart-frames-nav{flex:0 0 auto;margin-bottom:8px}
 .frames-pane .frames-layout{flex:1 1 auto!important;height:auto!important;min-height:0!important;display:grid!important;gap:8px!important;overflow:hidden!important}
 .frames-pane[data-smart-frames-view="film"] .frames-layout{grid-template-rows:auto minmax(0,1fr)!important}
@@ -109,6 +112,7 @@
   min-height:52px!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;
   padding:5px!important;border:1px solid var(--sp-line)!important;border-radius:14px!important;background:rgba(3,8,15,.42)!important;
 }
+.audio-workspace-spacer,.audio-workspace-summary{display:none!important}
 .audio-workspace-nav button{height:42px!important;width:100%!important;border:0!important;border-radius:10px!important;background:transparent!important;color:rgba(232,239,249,.54)!important;font-size:10px!important;font-weight:800!important;transition:transform .11s ease,background .15s ease,color .15s ease,box-shadow .15s ease!important}
 .audio-workspace-nav button:active{transform:scale(.94)!important}.audio-workspace-nav button.primary{color:#fff!important;background:var(--sp-accent-soft)!important;box-shadow:inset 0 0 0 1px var(--sp-accent-line),0 0 14px rgba(47,140,255,.12)!important}
 .audio-pane .audio-card{border:1px solid var(--sp-line)!important;background:var(--sp-card)!important;border-radius:16px!important;box-shadow:none!important}
@@ -118,7 +122,8 @@
 .audio-timeline-card .audio-clip-row{border:1px solid var(--sp-line)!important}.audio-timeline-card .audio-clip-row:focus-within{border-color:var(--sp-accent-line)!important;background:rgba(47,140,255,.07)!important}
 
 /* ---------- SAHNE ---------- */
-.scene-pane[data-smart-scene-view]{overflow:hidden!important;display:flex!important;flex-direction:column!important}
+.scene-pane[data-smart-scene-view]:not(.active){display:none!important}
+.scene-pane.active[data-smart-scene-view]{overflow:hidden!important;display:flex!important;flex-direction:column!important}
 .scene-pane .smart-scene-nav{flex:0 0 auto}
 .scene-pane .scene-layout{flex:1 1 auto!important;height:auto!important;min-height:0!important;display:block!important;overflow:hidden!important;padding:0!important}
 .scene-pane .scene-card{height:100%!important;min-height:0!important;min-width:0!important;width:100%!important;display:none!important;overflow-y:auto!important;overflow-x:hidden!important;padding:11px!important;border:1px solid var(--sp-line)!important;border-radius:16px!important;background:var(--sp-card)!important}
