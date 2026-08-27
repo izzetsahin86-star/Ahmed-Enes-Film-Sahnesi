@@ -87,8 +87,7 @@ async function addBackgroundFiles(fileList){
 
 async function selectBackground(id,{persist=true}={}){
   const record=backgrounds.find(item=>item.id===id);if(!record)return;
-  const img=new Image();img.decoding='async';img.src=record.url;
-  try{await img.decode()}catch{await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject})}
+  const img=await loadImageSrc(record.url);
   backgroundImage=img;backgroundUrl=record.url;backgroundName=record.name||'Arka plan';activeBackgroundId=record.id;
   if(persist)saveActiveId(record.id);
   updateUi();renderBackgroundGallery();
@@ -139,7 +138,7 @@ function insertScenePanel(){
         <label class="scene-range"><div><span>Dikey</span><b id="sceneYValue">0</b></div><input id="sceneY" type="range" min="-100" max="100" value="0"></label>
         <div class="scene-two-col"><label class="scene-range"><div><span>Bulanıklık</span><b id="sceneBlurValue">0</b></div><input id="sceneBlur" type="range" min="0" max="18" value="0"></label><label class="scene-range"><div><span>Parlaklık</span><b id="sceneBrightnessValue">100%</b></div><input id="sceneBrightness" type="range" min="40" max="160" value="100"></label></div>
       </div>
-      <div class="scene-note"><b>Çekim mantığı:</b> Galeriden seçtiğin aktif arka plan ve Chroma Key yeni çekilen kareye otomatik işlenir. Başka sahneye geçmek için küçük arka plan kartına dokunman yeterli.</div>
+      <div class="scene-note"><b>Çekim mantığı:</b> Manuel fotoğraf çektikten sonra bu kare için Arka Plan 1, 2, 3… seçimi sorulur. Seçtiğin sahne yalnızca o kareye işlenir.</div>
     </div>
     <input id="sceneBgInput" type="file" accept="image/*" multiple hidden>`;
   const projectPanel=$('[data-dock-panel="project"]',body);body.insertBefore(panel,projectPanel||null);
@@ -192,15 +191,15 @@ const originalCapture=CameraController.prototype.capture;
 CameraController.prototype.capture=function(canvas,options={}){
   const raw=originalCapture.call(this,canvas,options);
   if(!state.enabled||!backgroundImage||state.keyMode==='off')return raw;
-  try{return compositeScene(canvas)}catch(error){console.warn('Sahne uygulanamadı',error);return raw}
+  try{return compositeScene(canvas,backgroundImage)}catch(error){console.warn('Sahne uygulanamadı',error);return raw}
 };
 
-function compositeScene(foregroundCanvas){
+function compositeScene(foregroundCanvas,sceneImage=backgroundImage){
   const w=foregroundCanvas.width,h=foregroundCanvas.height;
-  if(!w||!h||!backgroundImage)return foregroundCanvas.toDataURL('image/jpeg',.99);
+  if(!w||!h||!sceneImage)return foregroundCanvas.toDataURL('image/jpeg',.99);
   const fg=foregroundCanvas.getContext('2d',{alpha:false,willReadFrequently:true}).getImageData(0,0,w,h);
   const out=document.createElement('canvas');out.width=w;out.height=h;const ctx=out.getContext('2d',{alpha:false});
-  drawBackground(ctx,w,h);
+  drawBackground(ctx,w,h,sceneImage);
   const bg=ctx.getImageData(0,0,w,h);
   const target=keyColor();const tolerance=clamp(state.tolerance,1,255);const feather=100;
   const f=fg.data,b=bg.data;
@@ -216,15 +215,69 @@ function compositeScene(foregroundCanvas){
   return foregroundCanvas.toDataURL('image/jpeg',.99);
 }
 
-function drawBackground(ctx,w,h){
+function drawBackground(ctx,w,h,sceneImage=backgroundImage){
   ctx.save();ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);
-  const iw=backgroundImage.naturalWidth||backgroundImage.width,ih=backgroundImage.naturalHeight||backgroundImage.height;
+  const iw=sceneImage.naturalWidth||sceneImage.width,ih=sceneImage.naturalHeight||sceneImage.height;
   const cover=Math.max(w/iw,h/ih)*(clamp(state.scale,50,300)/100);const dw=iw*cover,dh=ih*cover;
   const dx=(w-dw)/2+(state.x/100)*(w*.5);const dy=(h-dh)/2+(state.y/100)*(h*.5);
-  ctx.filter=`blur(${clamp(state.blur,0,30)}px) brightness(${clamp(state.brightness,20,200)}%)`;ctx.drawImage(backgroundImage,dx,dy,dw,dh);ctx.filter='none';ctx.restore();
+  ctx.filter=`blur(${clamp(state.blur,0,30)}px) brightness(${clamp(state.brightness,20,200)}%)`;ctx.drawImage(sceneImage,dx,dy,dw,dh);ctx.filter='none';ctx.restore();
 }
 function keyColor(){if(state.keyMode==='blue')return [0,80,255];if(state.keyMode==='custom')return hexToRgb(state.customColor);return [0,255,0]}
 function hexToRgb(hex){const n=parseInt(String(hex).replace('#',''),16);return [(n>>16)&255,(n>>8)&255,n&255]}
+function loadImageSrc(src){return new Promise((resolve,reject)=>{const img=new Image();img.decoding='async';img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('Görsel okunamadı.'));img.src=src;if(img.complete&&img.naturalWidth)resolve(img)})}
+
+async function applyBackgroundToCapturedData(rawDataUrl,record,index){
+  if(!record)return {dataUrl:rawDataUrl,backgroundId:'',backgroundNumber:0,backgroundName:'Arka plansız'};
+  await selectBackground(record.id,{persist:true});
+  state.enabled=true;
+  if(state.keyMode==='off'){state.keyMode='green';toast('Chroma Key Yeşil Fon olarak açıldı.');}
+  saveSettings();syncInputs();
+  const foreground=await loadImageSrc(rawDataUrl);
+  const canvas=document.createElement('canvas');canvas.width=foreground.naturalWidth||foreground.width;canvas.height=foreground.naturalHeight||foreground.height;
+  canvas.getContext('2d',{alpha:false}).drawImage(foreground,0,0,canvas.width,canvas.height);
+  const sceneImage=record.id===activeBackgroundId&&backgroundImage?backgroundImage:await loadImageSrc(record.url);
+  const dataUrl=compositeScene(canvas,sceneImage);
+  return {dataUrl,backgroundId:record.id,backgroundNumber:index+1,backgroundName:record.name||`Arka Plan ${index+1}`};
+}
+
+function promptBackgroundChoice(){
+  if(!backgrounds.length)return Promise.resolve({type:'none'});
+  document.querySelector('.scene-capture-picker')?.remove();
+  return new Promise(resolve=>{
+    const overlay=document.createElement('div');overlay.className='scene-capture-picker';overlay.tabIndex=-1;overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','Bu kare hangi arka plan olsun?');
+    const sheet=document.createElement('div');sheet.className='scene-capture-sheet';
+    const head=document.createElement('div');head.className='scene-capture-head';head.innerHTML='<div><small>YENİ KARE</small><strong>Bu kare hangi arka plan olsun?</strong><span>Numaralı sahnelerden birini seç.</span></div>';
+    const grid=document.createElement('div');grid.className='scene-capture-grid';
+    const finish=value=>{overlay.remove();resolve(value)};
+    const none=document.createElement('button');none.type='button';none.className='scene-capture-choice scene-capture-none';none.innerHTML='<div class="scene-capture-thumb"><span>∅</span></div><b>0</b><strong>Arka plansız</strong><small>Orijinal kare</small>';none.addEventListener('click',()=>finish({type:'none'}));grid.append(none);
+    backgrounds.forEach((record,index)=>{
+      const button=document.createElement('button');button.type='button';button.className='scene-capture-choice';button.dataset.bgId=record.id;button.setAttribute('aria-label',`Arka Plan ${index+1}: ${record.name||''}`);
+      const thumb=document.createElement('div');thumb.className='scene-capture-thumb';const img=document.createElement('img');img.src=record.url;img.alt='';thumb.append(img);
+      const number=document.createElement('b');number.textContent=String(index+1);
+      const title=document.createElement('strong');title.textContent=`Arka Plan ${index+1}`;
+      const name=document.createElement('small');name.textContent=record.name||`Sahne ${index+1}`;
+      button.append(thumb,number,title,name);button.addEventListener('click',()=>finish({type:'background',record,index}));grid.append(button);
+    });
+    const footer=document.createElement('div');footer.className='scene-capture-footer';const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Çekimi iptal et';cancel.addEventListener('click',()=>finish({type:'cancel'}));footer.append(cancel);
+    sheet.append(head,grid,footer);overlay.append(sheet);document.body.append(overlay);
+    overlay.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();finish({type:'cancel'})}});
+    requestAnimationFrame(()=>overlay.focus());
+  });
+}
+
+async function promptAndApplyCapturedFrame(rawDataUrl){
+  const choice=await promptBackgroundChoice();
+  if(choice.type==='cancel')return null;
+  if(choice.type==='none')return {dataUrl:rawDataUrl,backgroundId:'',backgroundNumber:0,backgroundName:'Arka plansız'};
+  try{return await applyBackgroundToCapturedData(rawDataUrl,choice.record,choice.index)}catch(error){console.warn('Seçilen sahne uygulanamadı',error);toast('Arka plan uygulanamadı; kare arka plansız kaydedildi.');return {dataUrl:rawDataUrl,backgroundId:'',backgroundNumber:0,backgroundName:'Arka plansız'}}
+}
+
+globalThis.AEFSSceneCapture={
+  hasBackgrounds:()=>backgrounds.length>0,
+  getBackgrounds:()=>backgrounds.map((record,index)=>({id:record.id,number:index+1,name:record.name||`Arka Plan ${index+1}`})),
+  promptAndApply:promptAndApplyCapturedFrame
+};
+
 function toast(msg){const el=$('#toast');if(!el)return;el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)}
 
 insertScenePanel();
