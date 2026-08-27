@@ -102,7 +102,7 @@ function installSheetGesture(){
 
 function installMicroFeedback(){
   document.addEventListener('pointerdown',event=>{
-    const target=event.target?.closest?.('.simple-tool-button,.simple-square-button,.simple-gallery-button,.simple-panel-button,.dock-tab,.dock-collapse,.panel-btn,.lock-action,.mini-action,.project-action,.export-launch,.shortcut-launch,.scene-bg-thumb,.scene-capture-choice');
+    const target=event.target?.closest?.('.simple-tool-button,.simple-square-button,.simple-gallery-button,.simple-panel-button,.dock-tab,.dock-collapse,.panel-btn,.lock-action,.mini-action,.project-action,.export-launch,.shortcut-launch,.scene-bg-thumb,.scene-capture-choice,.smart-panel-segment button,.smart-export-option,.audio-action,.ninja-sfx-pad,.sfx-pad,.history-actions .icon-btn');
     if(!target||target.disabled)return;
     target.classList.add('smart-pressing');
   },{passive:true});
