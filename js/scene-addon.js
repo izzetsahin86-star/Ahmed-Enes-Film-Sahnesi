@@ -3,21 +3,108 @@ import { CameraController } from './camera.js';
 const $=(s,r=document)=>r.querySelector(s);
 const clamp=(v,min,max)=>Math.min(max,Math.max(min,Number(v)||0));
 const SETTINGS_KEY='aefs-scene-settings-v1';
+const ACTIVE_BG_KEY='aefs-scene-active-bg-v2';
 const DB_NAME='aefs-scene-studio';
 const STORE='backgrounds';
+const MAX_BACKGROUNDS=24;
 
-const defaults={enabled:false,keyMode:'green',customColor:'#00ff00',tolerance:105,feather:55,scale:100,x:0,y:0,blur:0,brightness:100};
-let state={...defaults,...readSettings()};
+const defaults={enabled:false,keyMode:'green',customColor:'#00ff00',tolerance:105,feather:100,scale:100,x:0,y:0,blur:0,brightness:100};
+let state={...defaults,...readSettings(),feather:100};
+let backgrounds=[];
+let activeBackgroundId='';
 let backgroundImage=null;
 let backgroundUrl='';
 let backgroundName='Arka plan yok';
 
 function readSettings(){try{return JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')}catch{return {}}}
-function saveSettings(){try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(state))}catch{} updateUi()}
+function saveSettings(){state.feather=100;try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(state))}catch{} updateUi()}
+function readActiveId(){try{return localStorage.getItem(ACTIVE_BG_KEY)||''}catch{return ''}}
+function saveActiveId(id){activeBackgroundId=id||'';try{if(id)localStorage.setItem(ACTIVE_BG_KEY,id);else localStorage.removeItem(ACTIVE_BG_KEY)}catch{}}
+function makeId(){return globalThis.crypto?.randomUUID?.()||`bg-${Date.now()}-${Math.random().toString(36).slice(2,8)}`}
 function openDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(STORE))req.result.createObjectStore(STORE)};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
-async function storeBackground(blob,name){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put({blob,name},'active');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
-async function loadStoredBackground(){try{const db=await openDb();const data=await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readonly');const req=tx.objectStore(STORE).get('active');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});if(data?.blob)await useBackgroundBlob(data.blob,data.name||'Arka plan')}catch{}}
-async function clearStoredBackground(){try{const db=await openDb();await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete('active');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}catch{}}
+
+async function putBackground(record){
+  const db=await openDb();
+  return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put({id:record.id,name:record.name,blob:record.blob,createdAt:record.createdAt},`bg:${record.id}`);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});
+}
+async function deleteBackgroundRecord(id){
+  const db=await openDb();
+  return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(`bg:${id}`);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});
+}
+async function deleteLegacyActive(){
+  try{const db=await openDb();await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete('active');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}catch{}
+}
+async function readLegacyActive(){
+  try{const db=await openDb();return await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readonly');const req=tx.objectStore(STORE).get('active');req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error)})}catch{return null}
+}
+async function readAllBackgroundRecords(){
+  const db=await openDb();
+  return new Promise((resolve,reject)=>{
+    const out=[];const tx=db.transaction(STORE,'readonly');const req=tx.objectStore(STORE).openCursor();
+    req.onsuccess=()=>{const cursor=req.result;if(!cursor)return;const key=String(cursor.key||'');if(key.startsWith('bg:')&&cursor.value?.blob)out.push(cursor.value);cursor.continue()};
+    req.onerror=()=>reject(req.error);tx.oncomplete=()=>resolve(out.sort((a,b)=>(a.createdAt||0)-(b.createdAt||0)));tx.onerror=()=>reject(tx.error);
+  });
+}
+
+function recordWithUrl(record){return {...record,url:URL.createObjectURL(record.blob)}}
+function revokeRecord(record){try{if(record?.url)URL.revokeObjectURL(record.url)}catch{}}
+
+async function loadBackgroundLibrary(){
+  try{
+    let records=await readAllBackgroundRecords();
+    if(!records.length){
+      const legacy=await readLegacyActive();
+      if(legacy?.blob){
+        const migrated={id:makeId(),name:legacy.name||'Arka plan',blob:legacy.blob,createdAt:Date.now()};
+        await putBackground(migrated);await deleteLegacyActive();records=[migrated];
+      }
+    }
+    backgrounds.forEach(revokeRecord);
+    backgrounds=records.map(recordWithUrl);
+    let wanted=readActiveId();
+    if(!backgrounds.some(item=>item.id===wanted))wanted=backgrounds[0]?.id||'';
+    if(wanted)await selectBackground(wanted,{persist:true});else clearActiveBackground();
+    renderBackgroundGallery();
+  }catch(error){console.warn('Arka plan galerisi yüklenemedi',error)}
+}
+
+async function addBackgroundFiles(fileList){
+  const files=[...fileList].filter(file=>file?.type?.startsWith('image/'));
+  if(!files.length)return;
+  const room=Math.max(0,MAX_BACKGROUNDS-backgrounds.length);
+  if(!room){toast(`En fazla ${MAX_BACKGROUNDS} arka plan saklanabilir.`);return}
+  const accepted=files.slice(0,room);
+  let lastId='';
+  for(const file of accepted){
+    const record={id:makeId(),name:file.name||'Arka plan',blob:file,createdAt:Date.now()+Math.random()};
+    await putBackground(record);
+    const withUrl=recordWithUrl(record);backgrounds.push(withUrl);lastId=record.id;
+  }
+  if(files.length>accepted.length)toast(`${accepted.length} arka plan eklendi. Sınır ${MAX_BACKGROUNDS}.`);
+  if(lastId)await selectBackground(lastId,{persist:true});
+  state.enabled=true;if(state.keyMode==='off')state.keyMode='green';saveSettings();renderBackgroundGallery();
+}
+
+async function selectBackground(id,{persist=true}={}){
+  const record=backgrounds.find(item=>item.id===id);if(!record)return;
+  const img=new Image();img.decoding='async';img.src=record.url;
+  try{await img.decode()}catch{await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject})}
+  backgroundImage=img;backgroundUrl=record.url;backgroundName=record.name||'Arka plan';activeBackgroundId=record.id;
+  if(persist)saveActiveId(record.id);
+  updateUi();renderBackgroundGallery();
+}
+
+async function removeActiveBackground(){
+  const id=activeBackgroundId;if(!id)return;
+  const index=backgrounds.findIndex(item=>item.id===id);const record=backgrounds[index];
+  try{await deleteBackgroundRecord(id)}catch{toast('Arka plan silinemedi.');return}
+  revokeRecord(record);backgrounds.splice(index,1);
+  const next=backgrounds[Math.min(index,backgrounds.length-1)]||backgrounds[0];
+  if(next)await selectBackground(next.id,{persist:true});else{clearActiveBackground();saveActiveId('');state.enabled=false;saveSettings()}
+  renderBackgroundGallery();
+}
+
+function clearActiveBackground(){activeBackgroundId='';backgroundImage=null;backgroundUrl='';backgroundName='Arka plan yok';updateUi()}
 
 function insertScenePanel(){
   const nav=$('.dock-tabs'); const body=$('.dock-body');
@@ -34,14 +121,16 @@ function insertScenePanel(){
       <div class="scene-card scene-background-card">
         <div class="scene-card-head"><div><strong>Arka Plan</strong><small id="sceneBgName">Arka plan yok</small></div><label class="scene-switch"><input id="sceneEnabled" type="checkbox"><span></span></label></div>
         <div class="scene-preview" id="scenePreview"><span>Manzara / şehir / tapınak görseli ekle</span></div>
-        <div class="scene-actions"><button id="sceneAddBg" class="scene-primary" type="button">＋ Arka Plan Ekle</button><button id="sceneRemoveBg" type="button">Kaldır</button></div>
+        <div class="scene-library-head"><span>Arka planlar</span><b id="sceneBgCount">0</b></div>
+        <div class="scene-bg-gallery" id="sceneBgGallery"><div class="scene-bg-empty">Henüz arka plan yok</div></div>
+        <div class="scene-actions"><button id="sceneAddBg" class="scene-primary" type="button">＋ Arka Planlar Ekle</button><button id="sceneRemoveBg" type="button">Seçileni Sil</button></div>
       </div>
       <div class="scene-card">
         <div class="scene-card-head"><div><strong>Chroma Key</strong><small>Yeşil veya mavi fonu kaldır</small></div></div>
         <label class="scene-field"><span>Fon rengi</span><select id="sceneKeyMode"><option value="off">Kapalı</option><option value="green">Yeşil Fon</option><option value="blue">Mavi Fon</option><option value="custom">Özel Renk</option></select></label>
         <label class="scene-field scene-custom-color"><span>Özel renk</span><input id="sceneCustomColor" type="color" value="#00ff00"></label>
         <label class="scene-range"><div><span>Tolerans</span><b id="sceneToleranceValue">105</b></div><input id="sceneTolerance" type="range" min="20" max="220" value="105"></label>
-        <label class="scene-range"><div><span>Kenar yumuşatma</span><b id="sceneFeatherValue">55</b></div><input id="sceneFeather" type="range" min="0" max="140" value="55"></label>
+        <label class="scene-range"><div><span>Kenar yumuşatma</span><b id="sceneFeatherValue">100</b></div><input id="sceneFeather" type="range" min="100" max="100" value="100" disabled></label>
       </div>
       <div class="scene-card">
         <div class="scene-card-head"><div><strong>Arka Plan Yerleşimi</strong><small>Kadrajı sahneye uydur</small></div><button id="sceneReset" type="button">Sıfırla</button></div>
@@ -50,9 +139,9 @@ function insertScenePanel(){
         <label class="scene-range"><div><span>Dikey</span><b id="sceneYValue">0</b></div><input id="sceneY" type="range" min="-100" max="100" value="0"></label>
         <div class="scene-two-col"><label class="scene-range"><div><span>Bulanıklık</span><b id="sceneBlurValue">0</b></div><input id="sceneBlur" type="range" min="0" max="18" value="0"></label><label class="scene-range"><div><span>Parlaklık</span><b id="sceneBrightnessValue">100%</b></div><input id="sceneBrightness" type="range" min="40" max="160" value="100"></label></div>
       </div>
-      <div class="scene-note"><b>Çekim mantığı:</b> Arka plan ve Chroma Key açıkken yeni çekilen kareye sahne otomatik işlenir. Böylece Kareler, GIF, MP4 ve WebM çıktılarında aynı görünür.</div>
+      <div class="scene-note"><b>Çekim mantığı:</b> Galeriden seçtiğin aktif arka plan ve Chroma Key yeni çekilen kareye otomatik işlenir. Başka sahneye geçmek için küçük arka plan kartına dokunman yeterli.</div>
     </div>
-    <input id="sceneBgInput" type="file" accept="image/*" hidden>`;
+    <input id="sceneBgInput" type="file" accept="image/*" multiple hidden>`;
   const projectPanel=$('[data-dock-panel="project"]',body);body.insertBefore(panel,projectPanel||null);
   wireUi(panel);
 }
@@ -60,18 +149,19 @@ function insertScenePanel(){
 function wireUi(root){
   const bind=(id,event,fn)=>$('#'+id,root)?.addEventListener(event,fn);
   bind('sceneAddBg','click',()=>$('#sceneBgInput',root)?.click());
-  bind('sceneBgInput','change',async e=>{const file=e.target.files?.[0];if(!file)return;try{await storeBackground(file,file.name);await useBackgroundBlob(file,file.name);state.enabled=true;if(state.keyMode==='off')state.keyMode='green';saveSettings()}catch{toast('Arka plan eklenemedi.')}e.target.value=''});
-  bind('sceneRemoveBg','click',async()=>{releaseBackground();await clearStoredBackground();state.enabled=false;saveSettings()});
+  bind('sceneBgInput','change',async e=>{const files=e.target.files;if(!files?.length)return;try{await addBackgroundFiles(files)}catch(error){console.warn(error);toast('Arka planlar eklenemedi.')}e.target.value=''});
+  bind('sceneRemoveBg','click',()=>removeActiveBackground());
   bind('sceneEnabled','change',e=>{state.enabled=e.target.checked;saveSettings()});
   bind('sceneKeyMode','change',e=>{state.keyMode=e.target.value;saveSettings()});
   bind('sceneCustomColor','input',e=>{state.customColor=e.target.value;saveSettings()});
-  [['sceneTolerance','tolerance'],['sceneFeather','feather'],['sceneScale','scale'],['sceneX','x'],['sceneY','y'],['sceneBlur','blur'],['sceneBrightness','brightness']].forEach(([id,key])=>bind(id,'input',e=>{state[key]=Number(e.target.value);saveSettings()}));
-  bind('sceneReset','click',()=>{state={...state,scale:100,x:0,y:0,blur:0,brightness:100,tolerance:105,feather:55};saveSettings();syncInputs(root)});
-  syncInputs(root); updateUi();
+  [['sceneTolerance','tolerance'],['sceneScale','scale'],['sceneX','x'],['sceneY','y'],['sceneBlur','blur'],['sceneBrightness','brightness']].forEach(([id,key])=>bind(id,'input',e=>{state[key]=Number(e.target.value);saveSettings()}));
+  bind('sceneReset','click',()=>{state={...state,scale:100,x:0,y:0,blur:0,brightness:100,tolerance:105,feather:100};saveSettings();syncInputs(root)});
+  syncInputs(root); updateUi();renderBackgroundGallery();
 }
 
 function syncInputs(root=document){
-  const values={sceneEnabled:state.enabled,sceneKeyMode:state.keyMode,sceneCustomColor:state.customColor,sceneTolerance:state.tolerance,sceneFeather:state.feather,sceneScale:state.scale,sceneX:state.x,sceneY:state.y,sceneBlur:state.blur,sceneBrightness:state.brightness};
+  state.feather=100;
+  const values={sceneEnabled:state.enabled,sceneKeyMode:state.keyMode,sceneCustomColor:state.customColor,sceneTolerance:state.tolerance,sceneFeather:100,sceneScale:state.scale,sceneX:state.x,sceneY:state.y,sceneBlur:state.blur,sceneBrightness:state.brightness};
   Object.entries(values).forEach(([id,val])=>{const el=$('#'+id,root);if(!el)return;if(el.type==='checkbox')el.checked=Boolean(val);else el.value=String(val)});updateUi();
 }
 function updateUi(){
@@ -79,17 +169,24 @@ function updateUi(){
   const enabled=$('#sceneEnabled');if(enabled)enabled.checked=Boolean(state.enabled&&backgroundImage);
   const mode=$('#sceneKeyMode');if(mode)mode.value=state.keyMode;
   const color=$('#sceneCustomColor');if(color)color.value=state.customColor;
-  set('sceneBgName',backgroundName);set('sceneToleranceValue',state.tolerance);set('sceneFeatherValue',state.feather);set('sceneScaleValue',`${state.scale}%`);set('sceneXValue',state.x);set('sceneYValue',state.y);set('sceneBlurValue',state.blur);set('sceneBrightnessValue',`${state.brightness}%`);
+  set('sceneBgName',backgroundName);set('sceneBgCount',String(backgrounds.length));set('sceneToleranceValue',state.tolerance);set('sceneFeatherValue','100');set('sceneScaleValue',`${state.scale}%`);set('sceneXValue',state.x);set('sceneYValue',state.y);set('sceneBlurValue',state.blur);set('sceneBrightnessValue',`${state.brightness}%`);
   $('.scene-custom-color')?.classList.toggle('show',state.keyMode==='custom');
   const preview=$('#scenePreview');if(preview){preview.classList.toggle('has-image',Boolean(backgroundImage));preview.style.backgroundImage=backgroundUrl?`url("${backgroundUrl}")`:'';if(!backgroundImage)preview.innerHTML='<span>Manzara / şehir / tapınak görseli ekle</span>';else preview.innerHTML=''}
+  const remove=$('#sceneRemoveBg');if(remove)remove.disabled=!activeBackgroundId;
 }
 
-async function useBackgroundBlob(blob,name){
-  releaseBackground();
-  backgroundUrl=URL.createObjectURL(blob);backgroundName=name||'Arka plan';
-  const img=new Image();img.decoding='async';img.src=backgroundUrl;await img.decode();backgroundImage=img;updateUi();
+function renderBackgroundGallery(){
+  const gallery=$('#sceneBgGallery');if(!gallery)return;
+  gallery.innerHTML='';
+  if(!backgrounds.length){gallery.innerHTML='<div class="scene-bg-empty">Henüz arka plan yok</div>';updateUi();return}
+  backgrounds.forEach((record,index)=>{
+    const button=document.createElement('button');button.type='button';button.className='scene-bg-thumb';button.classList.toggle('active',record.id===activeBackgroundId);button.dataset.bgId=record.id;button.setAttribute('aria-label',`${index+1}. arka plan: ${record.name||'Arka plan'}`);button.title=record.name||`Arka plan ${index+1}`;
+    const img=document.createElement('img');img.src=record.url;img.alt='';img.loading='lazy';
+    const number=document.createElement('span');number.textContent=String(index+1);
+    button.append(img,number);button.addEventListener('click',()=>selectBackground(record.id,{persist:true}).catch(()=>toast('Arka plan açılamadı.')));gallery.append(button);
+  });
+  updateUi();
 }
-function releaseBackground(){if(backgroundUrl)URL.revokeObjectURL(backgroundUrl);backgroundUrl='';backgroundImage=null;backgroundName='Arka plan yok';updateUi()}
 
 const originalCapture=CameraController.prototype.capture;
 CameraController.prototype.capture=function(canvas,options={}){
@@ -105,13 +202,12 @@ function compositeScene(foregroundCanvas){
   const out=document.createElement('canvas');out.width=w;out.height=h;const ctx=out.getContext('2d',{alpha:false});
   drawBackground(ctx,w,h);
   const bg=ctx.getImageData(0,0,w,h);
-  const target=keyColor();const tolerance=clamp(state.tolerance,1,255);const feather=clamp(state.feather,0,180);
+  const target=keyColor();const tolerance=clamp(state.tolerance,1,255);const feather=100;
   const f=fg.data,b=bg.data;
   for(let i=0;i<f.length;i+=4){
     const dr=f[i]-target[0],dg=f[i+1]-target[1],db=f[i+2]-target[2];
     const dist=Math.sqrt(dr*dr+dg*dg+db*db);
-    let keep=dist<=tolerance?0:feather>0&&dist<tolerance+feather?(dist-tolerance)/feather:1;
-    // Yeşil/mavi saçılmayı kenarlarda azalt.
+    let keep=dist<=tolerance?0:dist<tolerance+feather?(dist-tolerance)/feather:1;
     if(keep>0&&keep<1){if(state.keyMode==='green')f[i+1]=Math.min(f[i+1],Math.max(f[i],f[i+2])*1.12);if(state.keyMode==='blue')f[i+2]=Math.min(f[i+2],Math.max(f[i],f[i+1])*1.12)}
     b[i]=Math.round(b[i]*(1-keep)+f[i]*keep);b[i+1]=Math.round(b[i+1]*(1-keep)+f[i+1]*keep);b[i+2]=Math.round(b[i+2]*(1-keep)+f[i+2]*keep);b[i+3]=255;
   }
@@ -132,5 +228,5 @@ function hexToRgb(hex){const n=parseInt(String(hex).replace('#',''),16);return [
 function toast(msg){const el=$('#toast');if(!el)return;el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)}
 
 insertScenePanel();
-loadStoredBackground().then(()=>syncInputs());
-window.addEventListener('beforeunload',releaseBackground);
+loadBackgroundLibrary().then(()=>syncInputs());
+window.addEventListener('beforeunload',()=>backgrounds.forEach(revokeRecord));
