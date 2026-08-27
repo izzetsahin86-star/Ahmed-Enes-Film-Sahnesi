@@ -55,6 +55,19 @@ function syncViewport(){
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content','#05080e');
 }
 
+function suppressStartupRestoreToast(){
+  const toast=$('#toast');
+  if(!toast)return;
+  const hiddenMessage='Son proje otomatik olarak geri yüklendi.';
+  const suppress=()=>{
+    if((toast.textContent||'').trim()!==hiddenMessage)return;
+    toast.classList.remove('show');
+    toast.textContent='';
+  };
+  suppress();
+  new MutationObserver(suppress).observe(toast,{childList:true,subtree:true,characterData:true});
+}
+
 function installOverlayFeedback(){
   if(document.documentElement.dataset.smartOverlayFeedback)return;
   document.documentElement.dataset.smartOverlayFeedback='1';
@@ -84,6 +97,7 @@ if(frameActions)new MutationObserver(()=>requestAnimationFrame(syncFrameActionIc
 const exportPane=$('.export-pane');
 if(exportPane)new MutationObserver(()=>requestAnimationFrame(syncExportOptions)).observe(exportPane,{childList:true});
 
+suppressStartupRestoreToast();
 installOverlayFeedback();
 installFullscreenDockExit();
 markReady();
