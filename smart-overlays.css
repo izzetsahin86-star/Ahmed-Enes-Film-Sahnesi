@@ -1,0 +1,60 @@
+/* Ahmed Enes Film Sahnesi — Akıllı Mobil açılır ekranlar / son rötuş */
+:root{--so-accent:#2f8cff;--so-accent-soft:rgba(47,140,255,.16);--so-line:rgba(255,255,255,.10);--so-card:rgba(255,255,255,.055);--so-bg:#07101d;--so-text:#f7f9fd;--so-muted:rgba(224,233,246,.56)}
+
+/* Boş kamera ekranı */
+.stage-empty{background:radial-gradient(circle at 50% 42%,rgba(31,76,137,.24),rgba(4,8,14,.96) 58%,#020407 100%)!important;gap:8px!important;padding:24px!important}
+.stage-empty .empty-icon{width:58px!important;height:58px!important;border-radius:19px!important;border:1px solid rgba(113,184,255,.24)!important;background:rgba(47,140,255,.09)!important;color:#b7dcff!important;box-shadow:0 0 22px rgba(47,140,255,.10)!important}
+.stage-empty strong{font-size:15px!important;color:#fff!important}.stage-empty>span{max-width:290px;font-size:10px!important;line-height:1.45;color:var(--so-muted)!important}
+.stage-empty .empty-action{min-height:44px!important;padding:0 16px!important;border-radius:13px!important;border:1px solid rgba(103,177,255,.32)!important;background:var(--so-accent-soft)!important;color:#e5f3ff!important;box-shadow:0 0 15px rgba(47,140,255,.10)!important;transition:transform .11s ease,background .14s ease!important}
+.stage-empty .empty-action:active{transform:scale(.95)!important;background:rgba(47,140,255,.25)!important}
+
+/* Toast */
+.toast{left:50%!important;right:auto!important;bottom:calc(var(--simple-dock-collapsed,68px) + max(18px,env(safe-area-inset-bottom)))!important;transform:translate(-50%,12px)!important;max-width:min(92vw,440px)!important;min-height:42px!important;padding:10px 14px!important;border:1px solid rgba(255,255,255,.11)!important;border-radius:14px!important;background:rgba(7,14,25,.91)!important;color:#f2f7ff!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;box-shadow:0 14px 36px rgba(0,0,0,.34)!important;font-size:10px!important;line-height:1.35!important;text-align:center!important}
+.toast.show{transform:translate(-50%,0)!important}
+body.smart-sheet-open .toast{bottom:max(16px,env(safe-area-inset-bottom))!important;z-index:12000!important}
+
+/* Kare önizleme */
+.frame-photo-preview{background:rgba(2,6,12,.92)!important;backdrop-filter:blur(22px)!important;-webkit-backdrop-filter:blur(22px)!important}
+.frame-photo-preview-bar{padding:2px 2px 8px!important}.frame-photo-preview-bar strong{font-size:13px!important;letter-spacing:.01em}
+.frame-photo-preview-close,.frame-photo-preview-nav{border:1px solid var(--so-line)!important;background:rgba(8,15,27,.70)!important;color:#fff!important;box-shadow:0 8px 22px rgba(0,0,0,.18)!important;transition:transform .11s ease,background .14s ease!important}
+.frame-photo-preview-close:active,.frame-photo-preview-nav:active:not(:disabled){transform:scale(.91)!important;background:var(--so-accent-soft)!important}
+.frame-photo-preview-body img{border:1px solid rgba(255,255,255,.08)!important;border-radius:18px!important;box-shadow:0 18px 55px rgba(0,0,0,.42)!important}
+.frame-photo-preview-count{display:inline-flex!important;justify-self:center!important;align-items:center!important;min-height:28px!important;padding:0 10px!important;margin-top:7px!important;border-radius:999px!important;background:rgba(255,255,255,.055)!important;border:1px solid rgba(255,255,255,.08)!important;color:var(--so-muted)!important}
+
+/* Video içe aktarma */
+.video-import-overlay{background:rgba(1,5,11,.78)!important;backdrop-filter:blur(22px)!important;-webkit-backdrop-filter:blur(22px)!important}
+.video-import-sheet{border-color:var(--so-line)!important;background:rgba(7,15,27,.985)!important;border-radius:24px!important;box-shadow:0 28px 90px rgba(0,0,0,.55)!important}
+.video-import-head{border-color:rgba(255,255,255,.07)!important}.video-import-head small{color:#82c5ff!important}.video-import-close{border-color:var(--so-line)!important;background:var(--so-card)!important;transition:transform .11s ease,background .14s ease!important}.video-import-close:active{transform:scale(.91)!important;background:var(--so-accent-soft)!important}
+.video-import-preview-wrap,.video-import-settings{border-color:var(--so-line)!important;background:rgba(255,255,255,.035)!important}
+.video-import-fps-card,.video-import-estimate>div{background:rgba(255,255,255,.045)!important}.video-import-trim input{border-color:var(--so-line)!important;background:#0b1729!important}
+.video-import-progress progress{accent-color:var(--so-accent)!important}.video-import-progress progress::-webkit-progress-value{background:var(--so-accent)!important}.video-import-progress progress::-moz-progress-bar{background:var(--so-accent)!important}
+.video-import-actions{border-color:rgba(255,255,255,.07)!important}.video-import-actions button{transition:transform .11s ease,background .14s ease!important}.video-import-actions button:active:not(:disabled){transform:scale(.97)!important}.video-import-confirm{background:linear-gradient(135deg,#3c99ff,#2479e8)!important;color:#fff!important;border-color:rgba(117,190,255,.45)!important;box-shadow:0 8px 24px rgba(47,140,255,.18)!important}.video-import-cancel{background:var(--so-card)!important;color:#dcecff!important}
+
+/* Çekim sonrası arka plan seçimi */
+.scene-capture-picker{background:rgba(1,5,11,.80)!important;backdrop-filter:blur(22px)!important;-webkit-backdrop-filter:blur(22px)!important}
+.scene-capture-sheet{background:rgba(7,15,27,.99)!important;border-color:var(--so-line)!important;box-shadow:0 28px 90px rgba(0,0,0,.56)!important}
+.scene-capture-head{border-color:rgba(255,255,255,.07)!important}.scene-capture-head small{color:#83c6ff!important}.scene-capture-head span{color:var(--so-muted)!important}
+.scene-capture-choice{border-color:var(--so-line)!important;background:rgba(255,255,255,.045)!important;transition:transform .11s ease,background .14s ease,border-color .14s ease,box-shadow .14s ease!important}.scene-capture-choice:active{transform:scale(.96)!important}.scene-capture-choice:focus-visible{border-color:rgba(113,184,255,.55)!important;background:var(--so-accent-soft)!important;box-shadow:0 0 0 2px rgba(47,140,255,.13)!important}.scene-capture-choice>b{background:#2f8cff!important}.scene-capture-none>b{background:#334155!important}.scene-capture-footer{border-color:rgba(255,255,255,.07)!important}.scene-capture-footer button{transition:transform .11s ease,background .14s ease!important}.scene-capture-footer button:active{transform:scale(.97)!important;background:rgba(255,255,255,.10)!important}
+
+/* Yerleşik dialoglar: Dışa Aktar / Kısayollar */
+dialog.studio-dialog{width:min(720px,calc(100vw - 20px))!important;max-height:min(86dvh,720px)!important;padding:0!important;border:1px solid var(--so-line)!important;border-radius:22px!important;background:rgba(7,15,27,.99)!important;color:var(--so-text)!important;box-shadow:0 28px 90px rgba(0,0,0,.56)!important;overflow:hidden!important}
+dialog.studio-dialog::backdrop{background:rgba(1,5,11,.76)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important}
+dialog.studio-dialog .dialog-head{min-height:62px!important;padding:11px 13px!important;border-bottom:1px solid rgba(255,255,255,.07)!important;background:rgba(255,255,255,.018)!important}
+dialog.studio-dialog .dialog-head h3{font-size:16px!important;margin:2px 0 0!important}.dialog-head .eyebrow{color:#82c5ff!important}.dialog-head .icon-btn{width:42px!important;height:42px!important;border-radius:13px!important;border-color:var(--so-line)!important;background:var(--so-card)!important;transition:transform .11s ease!important}.dialog-head .icon-btn:active{transform:scale(.91)!important}
+.enhanced-export-grid{padding:12px!important;gap:8px!important}.enhanced-export-grid .export-card{min-height:82px!important;border:1px solid var(--so-line)!important;border-radius:15px!important;background:var(--so-card)!important;transition:transform .11s ease,background .14s ease,border-color .14s ease!important}.enhanced-export-grid .export-card:active{transform:scale(.97)!important}.enhanced-export-grid .export-card.featured{background:var(--so-accent-soft)!important;border-color:rgba(103,177,255,.32)!important}.dialog-note{margin:0!important;padding:0 14px 14px!important;color:var(--so-muted)!important;font-size:9px!important;line-height:1.45!important}
+.shortcut-list{padding:12px!important;display:grid!important;gap:7px!important;overflow:auto!important}.shortcut-list>div{min-height:46px!important;padding:8px 10px!important;border:1px solid var(--so-line)!important;border-radius:12px!important;background:var(--so-card)!important}.shortcut-list kbd{border:1px solid rgba(255,255,255,.12)!important;border-radius:8px!important;background:#0b1729!important;color:#d9ecff!important;box-shadow:none!important}
+
+/* Sayaç */
+.countdown{font-variant-numeric:tabular-nums!important;text-shadow:0 10px 30px rgba(0,0,0,.55)!important}
+
+@media(max-width:700px){
+  .video-import-overlay{align-items:flex-end!important}.video-import-sheet{height:min(94dvh,820px)!important;max-height:min(94dvh,820px)!important;border-radius:22px 22px 0 0!important;border-bottom:0!important}.video-import-head{padding-top:12px!important}.video-import-actions{position:sticky!important;bottom:0!important;background:rgba(7,15,27,.98)!important}
+  .scene-capture-picker{padding:0!important;align-items:flex-end!important}.scene-capture-sheet{width:100%!important;max-height:82dvh!important;border-radius:22px 22px 0 0!important;border-left:0!important;border-right:0!important;border-bottom:0!important}.scene-capture-footer{padding-bottom:max(12px,env(safe-area-inset-bottom))!important}
+  dialog.studio-dialog{width:calc(100vw - 10px)!important;max-height:88dvh!important;border-radius:20px!important}.enhanced-export-grid{grid-template-columns:1fr 1fr!important}.enhanced-export-grid .export-card{min-height:76px!important;padding:9px!important}
+}
+@media(max-width:430px){
+  .frame-photo-preview-body{grid-template-columns:38px minmax(0,1fr) 38px!important}.frame-photo-preview-nav{width:36px!important;height:50px!important}.frame-photo-preview-close{width:40px!important;height:40px!important}
+  .enhanced-export-grid{grid-template-columns:1fr!important}.enhanced-export-grid .export-card{min-height:66px!important}
+  .scene-capture-head strong{font-size:16px!important}.scene-capture-grid{padding:9px!important}.scene-capture-choice{min-height:72px!important}
+}
+@media(prefers-reduced-motion:reduce){.stage-empty .empty-action,.frame-photo-preview-close,.frame-photo-preview-nav,.video-import-close,.video-import-actions button,.scene-capture-choice,.scene-capture-footer button,.enhanced-export-grid .export-card{transition:none!important}}
