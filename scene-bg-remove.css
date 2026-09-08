@@ -1,0 +1,11 @@
+/* AI Arka Plan Sil — seçili sahne görselini şeffaf PNG'ye dönüştürür */
+.scene-actions{grid-template-columns:minmax(0,1fr) auto auto auto!important}
+.scene-ai-remove-bg{display:inline-flex!important;align-items:center;justify-content:center;gap:5px;white-space:nowrap;border-color:rgba(105,183,255,.24)!important;background:rgba(22,136,255,.09)!important;color:#dff0ff!important}
+.scene-ai-remove-bg span{font-size:12px;color:#8ac6ff}.scene-ai-remove-bg:not(:disabled):active{transform:scale(.97)}
+.scene-ai-remove-bg.working{border-color:rgba(105,183,255,.5)!important;background:rgba(22,136,255,.18)!important;box-shadow:0 0 0 2px rgba(22,136,255,.08),0 0 18px rgba(22,136,255,.14);animation:sceneAiPulse 1.1s ease-in-out infinite}
+.scene-ai-remove-bg.error{border-color:rgba(248,113,113,.5)!important;background:rgba(239,68,68,.14)!important;color:#ffdada!important}
+.scene-ai-remove-bg:disabled{opacity:.38!important}
+@keyframes sceneAiPulse{0%,100%{opacity:.72}50%{opacity:1}}
+@media(max-width:700px){.scene-actions{grid-template-columns:minmax(0,1fr) repeat(3,auto)!important}.scene-ai-remove-bg{padding-inline:8px!important;font-size:9px!important}}
+@media(max-width:460px){.scene-actions{grid-template-columns:minmax(0,1fr) auto auto!important}.scene-ai-remove-bg{grid-column:1/-1;min-height:38px!important}.scene-ai-remove-bg span{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.scene-ai-remove-bg.working{animation:none}}
