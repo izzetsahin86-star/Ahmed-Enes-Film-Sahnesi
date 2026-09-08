@@ -6,7 +6,7 @@ const SETTINGS_KEY='aefs-scene-settings-v1';
 const ACTIVE_BG_KEY='aefs-scene-active-bg-v2';
 const DB_NAME='aefs-scene-studio';
 const STORE='backgrounds';
-const MAX_BACKGROUNDS=24;
+const MAX_BACKGROUNDS=Number.POSITIVE_INFINITY;
 
 const defaults={enabled:false,keyMode:'green',customColor:'#00ff00',tolerance:105,feather:100,scale:100,x:0,y:0,blur:0,brightness:100};
 let state={...defaults,...readSettings(),feather:100};
