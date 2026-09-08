@@ -6,8 +6,9 @@ import './ninja-sfx.js';
 import './sfx-preview.js';
 import './audio-workspace.js';
 import './audio-visual-timeline.js';
-import './scene-addon.js?v=50';
-import './scene-merge.js?v=50';
+import './scene-addon.js?v=51';
+import './scene-merge.js?v=51';
+import './scene-bg-remove.js?v=51';
 import './scene-capture-picker.js';
 import './scene-feather-fixed.js';
 import './startup-camera-defaults.js';
@@ -18,7 +19,7 @@ import './smart-mobile.js';
 import './smart-panels.js';
 import './smart-audit.js';
 
-const extraStyles=['./audio-timeline-tweak.css','./audio-workspace.css','./audio-visual-timeline.css','./scene-studio.css','./scene-merge.css','./playback-duration.css','./frame-preview-tools.css','./video-import.css','./smart-panels.css','./smart-overlays.css','./smart-final.css','./frames-actions-fix.css'];
+const extraStyles=['./audio-timeline-tweak.css','./audio-workspace.css','./audio-visual-timeline.css','./scene-studio.css','./scene-merge.css','./scene-bg-remove.css?v=51','./playback-duration.css','./frame-preview-tools.css','./video-import.css','./smart-panels.css','./smart-overlays.css','./smart-final.css','./frames-actions-fix.css'];
 extraStyles.forEach(href=>{
   if(document.querySelector(`link[href="${href}"]`))return;
   const link=document.createElement('link');
