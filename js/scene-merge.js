@@ -19,14 +19,14 @@ function install(card,gallery,actions){
   toggle.type='button';
   toggle.className='scene-merge-toggle';
   toggle.innerHTML='<span aria-hidden="true">▦</span> Birleştir';
-  toggle.title='2–5 arka planı tek sahnede birleştir';
+  toggle.title='İlk seçim ana arka plan, diğerleri üst katman olur';
   actions.append(toggle);
 
   const bar=document.createElement('div');
   bar.className='scene-merge-bar';
   bar.hidden=true;
   bar.innerHTML=`
-    <div class="scene-merge-info"><strong>Arka Plan Birleştir</strong><small id="sceneMergeHint">2–5 arka plan seç</small></div>
+    <div class="scene-merge-info"><strong>Arka Plan Birleştir</strong><small id="sceneMergeHint">Önce ANA arka planı seç</small></div>
     <b id="sceneMergeCount">0/5</b>
     <button id="sceneMergeCreate" type="button" disabled>Birleştir</button>
     <button id="sceneMergeCancel" type="button">İptal</button>`;
@@ -60,9 +60,15 @@ function setMergeMode(on){
   selected.clear();
   const gallery=$('#sceneBgGallery');
   gallery?.classList.toggle('merge-mode',mergeMode);
-  $$('.scene-bg-thumb',gallery||document).forEach(el=>el.classList.remove('merge-selected'));
+  $$('.scene-bg-thumb',gallery||document).forEach(el=>{
+    el.classList.remove('merge-selected');
+    el.querySelector('.scene-merge-role')?.remove();
+  });
   const bar=$('.scene-merge-bar');if(bar)bar.hidden=!mergeMode;
-  const toggle=$('#sceneMergeToggle');if(toggle){toggle.classList.toggle('active',mergeMode);toggle.innerHTML=mergeMode?'<span aria-hidden="true">✓</span> Seçiliyor':'<span aria-hidden="true">▦</span> Birleştir'}
+  const toggle=$('#sceneMergeToggle');if(toggle){
+    toggle.classList.toggle('active',mergeMode);
+    toggle.innerHTML=mergeMode?'<span aria-hidden="true">✓</span> Seçiliyor':'<span aria-hidden="true">▦</span> Birleştir';
+  }
   syncUi();
 }
 
@@ -71,7 +77,6 @@ function toggleSelection(thumb){
   if(!id)return;
   if(selected.has(id))selected.delete(id);
   else if(selected.size<5)selected.add(id);
-  thumb.classList.toggle('merge-selected',selected.has(id));
   syncUi();
   try{navigator.vibrate?.(10)}catch{}
 }
@@ -80,9 +85,30 @@ function syncUi(message=''){
   const count=$('#sceneMergeCount');
   const hint=$('#sceneMergeHint');
   const create=$('#sceneMergeCreate');
-  if(count)count.textContent=`${selected.size}/5`;
-  if(create)create.disabled=selected.size<2||selected.size>5;
-  if(hint)hint.textContent=message||(selected.size<2?'En az 2 arka plan seç':selected.size===5?'5 arka plan seçildi · hazır':'İstersen daha fazla seç veya birleştir');
+  const ids=[...selected];
+  const gallery=$('#sceneBgGallery');
+
+  $$('.scene-bg-thumb',gallery||document).forEach(thumb=>{
+    const order=ids.indexOf(thumb.dataset.bgId);
+    const isSelected=order>=0;
+    thumb.classList.toggle('merge-selected',isSelected);
+    let badge=thumb.querySelector('.scene-merge-role');
+    if(!isSelected){badge?.remove();return}
+    if(!badge){badge=document.createElement('em');badge.className='scene-merge-role';thumb.append(badge)}
+    badge.textContent=order===0?'ANA':`K${order+1}`;
+    badge.classList.toggle('main',order===0);
+  });
+
+  if(count)count.textContent=`${ids.length}/5`;
+  if(create)create.disabled=ids.length<2||ids.length>5;
+  if(hint){
+    hint.textContent=message||(
+      ids.length===0?'Önce ANA arka planı seç':
+      ids.length===1?'ANA sabitlendi · şimdi üst katman seç':
+      ids.length===5?'ANA + 4 katman hazır':
+      `ANA + ${ids.length-1} katman seçildi`
+    );
+  }
 }
 
 async function createMergedBackground(){
@@ -96,12 +122,18 @@ async function createMergedBackground(){
   try{
     const images=await Promise.all(thumbs.map(thumb=>loadImage($('img',thumb)?.src)));
     const canvas=document.createElement('canvas');canvas.width=1920;canvas.height=1080;
-    const ctx=canvas.getContext('2d',{alpha:false});ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);
-    const cells=layoutCells(images.length,canvas.width,canvas.height);
-    images.forEach((img,index)=>drawCover(ctx,img,cells[index]));
-    const blob=await new Promise((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error('Birleşik görsel oluşturulamadı.')),'image/jpeg',.94));
-    const numbers=thumbs.map(thumb=>String($('span',thumb)?.textContent||'').trim()).filter(Boolean);
-    const file=new File([blob],`Birlesik-BG-${numbers.join('-')}.jpg`,{type:'image/jpeg',lastModified:Date.now()});
+    const ctx=canvas.getContext('2d',{alpha:false});
+
+    // 1. seçim her zaman sabit ANA arka plandır ve tüm sahneyi doldurur.
+    drawCover(ctx,images[0],{x:0,y:0,w:canvas.width,h:canvas.height});
+
+    // Diğer seçimler ana arka planın üstünde katman olarak yerleşir.
+    const overlays=overlayCells(images.length-1,canvas.width,canvas.height);
+    images.slice(1).forEach((img,index)=>drawOverlay(ctx,img,overlays[index]));
+
+    const blob=await new Promise((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error('Birleşik görsel oluşturulamadı.')),'image/jpeg',.95));
+    const numbers=thumbs.map(thumb=>String(thumb.querySelector(':scope > span')?.textContent||'').trim()).filter(Boolean);
+    const file=new File([blob],`ANA-BG-${numbers.join('-')}.jpg`,{type:'image/jpeg',lastModified:Date.now()});
     const input=$('#sceneBgInput');
     if(!input)throw new Error('Arka plan ekleme alanı bulunamadı.');
     const transfer=new DataTransfer();transfer.items.add(file);input.files=transfer.files;
@@ -111,15 +143,25 @@ async function createMergedBackground(){
   finally{if(create){create.textContent='Birleştir';create.disabled=selected.size<2}}
 }
 
-function layoutCells(count,w,h){
-  if(count===2)return [{x:0,y:0,w:w/2,h},{x:w/2,y:0,w:w/2,h}];
-  if(count===3)return [0,1,2].map(i=>({x:i*w/3,y:0,w:w/3,h}));
-  if(count===4)return [0,1,2,3].map(i=>({x:(i%2)*w/2,y:Math.floor(i/2)*h/2,w:w/2,h:h/2}));
-  if(count===5)return [
-    {x:0,y:0,w:w/3,h:h/2},{x:w/3,y:0,w:w/3,h:h/2},{x:2*w/3,y:0,w:w/3,h:h/2},
-    {x:0,y:h/2,w:w/2,h:h/2},{x:w/2,y:h/2,w:w/2,h:h/2}
+function overlayCells(count,w,h){
+  // Ana arka plan görünür kalacak şekilde üst katman alanları.
+  if(count===1)return [{x:w*.20,y:h*.17,w:w*.60,h:h*.66}];
+  if(count===2)return [
+    {x:w*.035,y:h*.20,w:w*.45,h:h*.60},
+    {x:w*.515,y:h*.20,w:w*.45,h:h*.60}
   ];
-  return [{x:0,y:0,w,h}];
+  if(count===3)return [
+    {x:w*.04,y:h*.055,w:w*.44,h:h*.43},
+    {x:w*.52,y:h*.055,w:w*.44,h:h*.43},
+    {x:w*.28,y:h*.515,w:w*.44,h:h*.43}
+  ];
+  if(count===4)return [
+    {x:w*.035,y:h*.045,w:w*.45,h:h*.43},
+    {x:w*.515,y:h*.045,w:w*.45,h:h*.43},
+    {x:w*.035,y:h*.525,w:w*.45,h:h*.43},
+    {x:w*.515,y:h*.525,w:w*.45,h:h*.43}
+  ];
+  return [];
 }
 
 function drawCover(ctx,img,cell){
@@ -127,6 +169,18 @@ function drawCover(ctx,img,cell){
   const scale=Math.max(cell.w/iw,cell.h/ih);const dw=iw*scale,dh=ih*scale;
   const dx=cell.x+(cell.w-dw)/2,dy=cell.y+(cell.h-dh)/2;
   ctx.save();ctx.beginPath();ctx.rect(cell.x,cell.y,cell.w,cell.h);ctx.clip();ctx.drawImage(img,dx,dy,dw,dh);ctx.restore();
+}
+
+function drawOverlay(ctx,img,cell){
+  if(!cell)return;
+  const iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height;
+  // Üst katmanda görselin tamamını koru; ana arka plan kenarlarda görünmeye devam eder.
+  const scale=Math.min(cell.w/iw,cell.h/ih);const dw=iw*scale,dh=ih*scale;
+  const dx=cell.x+(cell.w-dw)/2,dy=cell.y+(cell.h-dh)/2;
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,.28)';ctx.shadowBlur=18;ctx.shadowOffsetY=6;
+  ctx.drawImage(img,dx,dy,dw,dh);
+  ctx.restore();
 }
 
 function loadImage(src){
