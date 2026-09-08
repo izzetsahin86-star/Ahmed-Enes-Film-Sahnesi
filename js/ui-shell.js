@@ -7,6 +7,7 @@ import './sfx-preview.js';
 import './audio-workspace.js';
 import './audio-visual-timeline.js';
 import './scene-addon.js';
+import './scene-merge.js';
 import './scene-capture-picker.js';
 import './scene-feather-fixed.js';
 import './startup-camera-defaults.js';
