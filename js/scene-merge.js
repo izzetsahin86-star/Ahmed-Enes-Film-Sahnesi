@@ -19,7 +19,7 @@ function install(card,gallery,actions){
   toggle.type='button';
   toggle.className='scene-merge-toggle';
   toggle.innerHTML='<span aria-hidden="true">▦</span> Birleştir';
-  toggle.title='Ana arka plan sabit kalır, diğerlerini sen yerleştirirsin';
+  toggle.title='Ana arka plan sabit kalır, diğerlerini sınırsız seçip sen yerleştirirsin';
   actions.append(toggle);
 
   const bar=document.createElement('div');
@@ -27,7 +27,7 @@ function install(card,gallery,actions){
   bar.hidden=true;
   bar.innerHTML=`
     <div class="scene-merge-info"><strong>Arka Plan Birleştir</strong><small id="sceneMergeHint">Önce ANA arka planı seç</small></div>
-    <b id="sceneMergeCount">0/5</b>
+    <b id="sceneMergeCount">0</b>
     <button id="sceneMergeCreate" type="button" disabled>Yerleştir</button>
     <button id="sceneMergeCancel" type="button">İptal</button>`;
   gallery.insertAdjacentElement('afterend',bar);
@@ -76,7 +76,7 @@ function toggleSelection(thumb){
   const id=thumb.dataset.bgId;
   if(!id)return;
   if(selected.has(id))selected.delete(id);
-  else if(selected.size<5)selected.add(id);
+  else selected.add(id);
   syncUi();
   try{navigator.vibrate?.(10)}catch{}
 }
@@ -99,13 +99,12 @@ function syncUi(message=''){
     badge.classList.toggle('main',order===0);
   });
 
-  if(count)count.textContent=`${ids.length}/5`;
-  if(create)create.disabled=ids.length<2||ids.length>5;
+  if(count)count.textContent=String(ids.length);
+  if(create)create.disabled=ids.length<2;
   if(hint){
     hint.textContent=message||(
       ids.length===0?'Önce ANA arka planı seç':
-      ids.length===1?'ANA sabitlendi · üstüne eklenecek görselleri seç':
-      ids.length===5?'ANA + 4 katman hazır · Yerleştir':
+      ids.length===1?'ANA sabitlendi · istediğin kadar üst katman seç':
       `ANA + ${ids.length-1} katman seçildi · Yerleştir`
     );
   }
@@ -118,7 +117,7 @@ function selectedThumbs(){
 
 async function openSelectedLayers(){
   const thumbs=selectedThumbs();
-  if(thumbs.length<2||thumbs.length>5)return;
+  if(thumbs.length<2)return;
   const create=$('#sceneMergeCreate');
   if(create){create.disabled=true;create.textContent='Açılıyor…'}
   try{
